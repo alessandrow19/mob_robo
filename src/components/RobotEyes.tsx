@@ -57,8 +57,9 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
   };
 
   return (
-    <div className="flex items-center justify-center gap-8 helmet">    
-
+    <div className="flex flex-col items-center justify-center gap-8 helmet">    
+ {/* Olhos */}
+    <div className="flex items-center justify-center gap-8">
       {/* Olho Esquerdo */}
       <div 
         className={`w-24 h-24 overflow-hidden transition-all duration-500 ${
@@ -95,6 +96,17 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
           width={100}
           height={100}         
           className='opacity-90'
+        />
+      </div>
+    </div>
+
+      {/* Olhinhos pidões */}
+      <div className='boca animate-pulse'>
+        <Image
+          src="/face/boca.png"
+          alt="Boca"
+          width={100}
+          height={100}
         />
       </div>
 
