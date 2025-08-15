@@ -44,13 +44,7 @@ export default function RobotEyes() {
   };
 
   return (
-    <div className="flex items-center justify-center gap-8">
-      {/* Título da expressão */}
-      <div className="absolute -top-12 text-center">
-        <span className="text-sm text-gray-600">
-          {expression === 'puppy' ? '🥺 Olhinhos pidões' : '😐 Normal'}
-        </span>
-      </div>
+    <div className="flex items-center justify-center gap-8 helmet">    
 
       {/* Olho Esquerdo */}
       <div 
@@ -64,7 +58,8 @@ export default function RobotEyes() {
           alt="Olho esquerdo"
           width={120}
           height={120}
-          className={expression === 'puppy' ? 'opacity-90' : ''}
+          // className={expression === 'puppy' ? 'opacity-90' : ''}
+          className='opacity-90'
         />
       </div>
 
@@ -73,19 +68,20 @@ export default function RobotEyes() {
         className={`w-24 h-24 overflow-hidden transition-all duration-500 ${
           isBlinking ? 'scale-y-[0.1]' : 'scale-y-100'
         }`}
-        style={{
-          ...getPuppyStyles(),
-          transform: expression === 'puppy' 
-            ? 'scale(1.3) translateY(3px) rotate(2deg)' 
-            : undefined
-        }}
+        // style={{
+        //   ...getPuppyStyles(),
+        //   transform: expression === 'puppy' 
+        //     ? 'scale(1.3) translateY(3px) rotate(2deg)' 
+        //     : undefined
+        // }}
       >
         <Image
           src="/face/olho.png"
           alt="Olho direito"
           width={120}
           height={120}
-          className={expression === 'puppy' ? 'opacity-90' : ''}
+          // className={expression === 'puppy' ? 'opacity-90' : ''}
+          className='opacity-90'
         />
       </div>
 

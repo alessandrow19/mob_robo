@@ -23,6 +23,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
 @tailwind utilities;
@@ -42,6 +48,8 @@ body {
   50% { transform: scaleY(0.1); }
   100% { transform: scaleY(1); }
 }
+
+
 
 /* Efeito suave para containers */
 .robot-eye {
@@ -70,7 +78,25 @@ body {
 .container {
   position: relative;
   display: inline-block;
-    width: 720px;
-    height: 560px;
+  width: 720px;
+  height: 560px;
+
 }
+
+.hidden{
+
+
+}
+
+.helmet {
+  position: relative;
+  width: 400px; /* Largura do capacete */
+  height: 350px; /* Altura do capacete */
+  border-radius: 50%; /* Formato arredondado */
+  overflow: hidden; /* Garante que os olhos não saiam do capacete */
+  background-image: url('/face/capacete.png');
+  background-size: cover; /* Ajusta a imagem para cobrir o capacete */
+  background-position: center; /* Centraliza a imagem */
+}
+
 
