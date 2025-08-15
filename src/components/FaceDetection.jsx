@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as faceapi from 'face-api.js';
 import './FaceDetection.css';
 
-const FaceDetection = ({ videoElement }) => {
+const FaceDetection = ({ videoElement, onFaceDetected }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const FaceDetection = ({ videoElement }) => {
           // Lógica de direção
           if (detections.length > 0) {
             const box = detections[0].detection.box;
-            const faceCenterX = box.x + box.width / 2;
+            const faceCenterX = box.x + box.width / 2 -95;
             const faceCenterY = box.y + box.height / 2;
             const videoCenterX = displaySize.width / 2;
             const videoCenterY = displaySize.height / 2;
@@ -41,6 +41,11 @@ const FaceDetection = ({ videoElement }) => {
             else if (faceCenterX > videoCenterX + 50) direction = 'right';
             else if (faceCenterY < videoCenterY - 50) direction = 'up';
             else if (faceCenterY > videoCenterY + 50) direction = 'down';
+
+            if (onFaceDetected) {
+              onFaceDetected({ x: faceCenterX, y: faceCenterY, direction });
+          
+            }
 
             console.log(`Direction: ${direction}`);
           }

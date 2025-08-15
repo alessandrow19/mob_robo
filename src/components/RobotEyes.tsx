@@ -4,8 +4,11 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 type Expression = 'normal' | 'puppy';
+type RobotEyesProps = {
+  facePosition: { x: number; y: number };
+};
 
-export default function RobotEyes() {
+export default function RobotEyes({ facePosition }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
   const [expression, setExpression] = useState<Expression>('normal');
   const [showHearts, setShowHearts] = useState(false);
@@ -31,6 +34,16 @@ export default function RobotEyes() {
     return () => clearInterval(expressionInterval);
   }, []);
 
+  // Calcular o deslocamento dos olhos com base na posição do rosto
+  const calculateEyePosition = (faceX: number, faceY: number) => {
+    const maxOffset = 50; // Máximo deslocamento dos olhos
+    const offsetX = Math.min(Math.max((faceX / 20)*-1, -maxOffset), maxOffset);
+    const offsetY = Math.min(Math.max((faceY / 20)*-1, -maxOffset), maxOffset);
+    return { offsetX, offsetY };
+  };
+
+  const { offsetX, offsetY } = calculateEyePosition(facePosition.x, facePosition.y);
+
   // Estilos para olhinhos pidões
   const getPuppyStyles = () => {
     if (expression === 'puppy') {
@@ -50,14 +63,17 @@ export default function RobotEyes() {
       <div 
         className={`w-24 h-24 overflow-hidden transition-all duration-500 ${
           isBlinking ? 'scale-y-[0.1]' : 'scale-y-100'
-        }`}
-        style={getPuppyStyles()}
+        }`}  
+
+        style={{
+          transform: `translate(${offsetX}px, ${offsetY}px)`,
+        }}
       >
         <Image
           src="/face/olho.png"
           alt="Olho esquerdo"
-          width={120}
-          height={120}
+          width={100}
+          height={100}
           // className={expression === 'puppy' ? 'opacity-90' : ''}
           className='opacity-90'
         />
@@ -68,19 +84,16 @@ export default function RobotEyes() {
         className={`w-24 h-24 overflow-hidden transition-all duration-500 ${
           isBlinking ? 'scale-y-[0.1]' : 'scale-y-100'
         }`}
-        // style={{
-        //   ...getPuppyStyles(),
-        //   transform: expression === 'puppy' 
-        //     ? 'scale(1.3) translateY(3px) rotate(2deg)' 
-        //     : undefined
-        // }}
+
+        style={{
+          transform: `translate(${offsetX}px, ${offsetY}px)`,
+        }}
       >
         <Image
           src="/face/olho.png"
           alt="Olho direito"
-          width={120}
-          height={120}
-          // className={expression === 'puppy' ? 'opacity-90' : ''}
+          width={100}
+          height={100}         
           className='opacity-90'
         />
       </div>
