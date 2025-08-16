@@ -32,34 +32,47 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
-  padding-top:  50vh; 
+  padding-top: 50vh;
 }
 
 @tailwind utilities;
 
 /* Animação de tremulação fofa para olhinhos pidões */
 @keyframes puppy-tremble {
-  0% { transform: scale(1.3) translateY(3px) rotate(-2deg) translateX(0px); }
-  25% { transform: scale(1.3) translateY(4px) rotate(-1.5deg) translateX(0.5px); }
-  50% { transform: scale(1.3) translateY(2px) rotate(-2.5deg) translateX(-0.5px); }
-  75% { transform: scale(1.3) translateY(3.5px) rotate(-1deg) translateX(0.3px); }
-  100% { transform: scale(1.3) translateY(3px) rotate(-2deg) translateX(0px); }
+  0% {
+    transform: scale(1.3) translateY(3px) rotate(-2deg) translateX(0px);
+  }
+  25% {
+    transform: scale(1.3) translateY(4px) rotate(-1.5deg) translateX(0.5px);
+  }
+  50% {
+    transform: scale(1.3) translateY(2px) rotate(-2.5deg) translateX(-0.5px);
+  }
+  75% {
+    transform: scale(1.3) translateY(3.5px) rotate(-1deg) translateX(0.3px);
+  }
+  100% {
+    transform: scale(1.3) translateY(3px) rotate(-2deg) translateX(0px);
+  }
 }
 
 /* Animação original de piscar */
 @keyframes blink {
-  0% { transform: scaleY(1); }
-  50% { transform: scaleY(0.1); }
-  100% { transform: scaleY(1); }
+  0% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+  100% {
+    transform: scaleY(1);
+  }
 }
-
-
 
 /* Efeito suave para containers */
 .robot-eye {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 .canvas-face {
   position: absolute;
@@ -68,11 +81,10 @@ body {
   width: 100%;
   height: 100%;
   z-index: 100;
-
 }
 
 .video-stream video {
- position: absolute;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -85,12 +97,10 @@ body {
   width: 720px;
   height: 560px;
   z-index: 0;
-
-
+  opacity: 0;
 }
 
-.hidden{
-
+.hidden {
   opacity: 0;
 }
 
@@ -100,21 +110,18 @@ body {
   height: 450px; /* Altura do capacete */
   border-radius: 50%; /* Formato arredondado */
   overflow: hidden; /* Garante que os olhos não saiam do capacete */
-  background-image: url('/face/capacete.png');
+  background-image: url("/face/capacete.png");
   background-size: cover; /* Ajusta a imagem para cobrir o capacete */
   background-position: center; /* Centraliza a imagem */
   z-index: 100;
-
 }
 
-
-
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
     transform: scale(1.2);
   }
-
 }

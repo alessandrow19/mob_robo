@@ -78,7 +78,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
     facePosition.x,
     facePosition.y
   );
-  console.log("Face Position:", facePosition, "Offset:", { offsetX, offsetY });
+
   // Estilos para olhinhos pidões
   const getPuppyStyles = () => {
     if (expression === "puppy") {
@@ -95,7 +95,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
     <div className="flex flex-col items-center justify-center gap-8 helmet ">
       {/* Olhos */}
       <div
-        className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[200px] transition-all duration-500"
+        className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
         style={{
           transform: `translate(${offsetX}px, ${offsetY}px) ${
             isBlinking ? "scaleY(0.1)" : "scaleY(1)"
@@ -114,7 +114,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
         </div>
 
         {/* Olho Direito */}
-        <div className="w-24 h-24 overflow-hidden">
+        <div className="w-24 h-24 ">
           <Image
             src="/face/olho.png"
             alt="Olho direito"
