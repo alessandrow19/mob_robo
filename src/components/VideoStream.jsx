@@ -18,7 +18,6 @@ const VideoStream = ({ onVideoReady }) => {
         })
         .catch((err) => console.error("Error accessing webcam:", err));
     };
-
     startVideo();
   }, [onVideoReady]);
 
