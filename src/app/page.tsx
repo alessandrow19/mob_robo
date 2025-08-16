@@ -12,10 +12,12 @@ const [videoElement, setVideoElement] = useState(null)
 const [facePosition, setFacePosition] = useState({ x: 0, y: 0 });
 const [currentDirection, setCurrentDirection] = useState("center"); // Estado para a direção atual
   return (
-    <>
-    <div><RobotEyes facePosition={facePosition} /></div>
+    <div className="relative grid min-h-dvh w-dvw place-items-center">
+  
+      <div className="m-auto"><RobotEyes facePosition={facePosition} /></div>  
+      
     <div className="container">     
-      <div >
+      <div className="fixed bottom-3 left-3">
         <VideoStream onVideoReady={setVideoElement} />
 
          {/* Componente de detecção facial */}
@@ -35,7 +37,7 @@ const [currentDirection, setCurrentDirection] = useState("center"); // Estado pa
     </div>
     {/* Adicione o componente DirectionTracker */}
       <DirectionTracker direction={currentDirection} />
-    </>
+    </div>
   );
 }
 

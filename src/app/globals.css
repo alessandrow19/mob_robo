@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 @theme inline {
@@ -82,7 +85,7 @@ body {
   width: 720px;
   height: 560px;
   z-index: 0;
-  opacity: 0;
+
 
 }
 
