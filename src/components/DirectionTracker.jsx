@@ -49,7 +49,7 @@ export default function DirectionTracker({ direction }) {
           
           // Publica o comando no tópico correto do Otto
           client.publish(
-            "otto/comando", // Tópico que o Otto está escutando
+            "mob/comando", // Tópico que o Otto está escutando
             ottoCommand,    // Comando simples (apenas o caractere)
             { qos: 1 },     // Qualidade de serviço
             (err) => {
@@ -67,7 +67,7 @@ export default function DirectionTracker({ direction }) {
         // Atualiza a direção anterior
         setPreviousDirection(direction);
       }
-    }, 1000); // Reduzido para 1 segundo para resposta mais rápida
+    }, 3000); // Reduzido para 1 segundo para resposta mais rápida
 
     return () => clearInterval(interval);
   }, [direction, previousDirection, client]);
