@@ -108,7 +108,6 @@ body {
   position: relative;
   width: 500px; /* Largura do capacete */
   height: 450px; /* Altura do capacete */
-  border-radius: 50%; /* Formato arredondado */
   overflow: hidden; /* Garante que os olhos não saiam do capacete */
   background-image: url("/face/capacete.png");
   background-size: cover; /* Ajusta a imagem para cobrir o capacete */

@@ -47,6 +47,11 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
     const videoWidth = 720;
     const videoHeight = 560;
 
+    // Se não há posição válida do rosto, retorna centro (0, 0)
+    if (faceX === 0 && faceY === 0) {
+      return { offsetX: 0, offsetY: 0 };
+    }
+
     // Normalizar as coordenadas do rosto para um range de -1 a 1
     // Baseado no centro do vídeo
     const normalizedX = (faceX - videoWidth / 2) / (videoWidth / 2);
@@ -92,7 +97,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 helmet ">
+    <div className="flex flex-col items-center justify-center gap-8 helmet fixed mt-80">
       {/* Olhos */}
       <div
         className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
