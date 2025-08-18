@@ -97,7 +97,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 helmet fixed mt-80">
+    <div className="flex flex-col items-center justify-center gap-8 helmet fixed mt-60">
       {/* Olhos */}
       <div
         className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"

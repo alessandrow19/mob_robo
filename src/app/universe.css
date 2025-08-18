@@ -1,0 +1,134 @@
+/* ...existing code... */
+
+/* Plano de fundo do universo com estrelas se movendo */
+.universe-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+/* Camadas de estrelas com diferentes velocidades */
+.stars-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Estrelas pequenas e distantes - VERSÃO MAIS VISÍVEL */
+.stars-small {
+  background-image: radial-gradient(circle, #fff 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+    radial-gradient(circle, #fff 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
+  background-position: 20% 30%, 40% 70%, 90% 40%, 60% 10%, 10% 80%;
+  background-repeat: repeat;
+  background-size: 150px 150px, 200px 200px, 250px 250px, 180px 180px,
+    220px 220px;
+  animation: move-stars 50s linear infinite;
+}
+
+/* Estrelas médias - MAIS VISÍVEIS */
+.stars-medium {
+  background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.9) 2px,
+      transparent 2px
+    ),
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 2px, transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 2px, transparent 2px);
+  background-position: 30% 20%, 70% 60%, 50% 90%;
+  background-repeat: repeat;
+  background-size: 300px 300px, 250px 250px, 350px 350px;
+  animation: move-stars 30s linear infinite reverse;
+}
+
+/* Estrelas grandes e brilhantes - MAIS BRILHANTES */
+.stars-large {
+  background-image: radial-gradient(circle, #fff 3px, transparent 3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 3px, transparent 3px);
+  background-position: 80% 30%, 20% 80%;
+  background-repeat: repeat;
+  background-size: 400px 400px, 500px 500px;
+  animation: move-stars 20s linear infinite;
+}
+
+/* Estrelas cintilantes - MAIS VISÍVEIS */
+.stars-twinkle {
+  background-image: radial-gradient(circle, #fff 2px, transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 2px, transparent 2px);
+  background-position: 25% 25%, 75% 75%;
+  background-repeat: repeat;
+  background-size: 300px 300px, 400px 400px;
+  animation: move-stars 40s linear infinite, twinkle 2s ease-in-out infinite;
+}
+
+/* Nebulosa distante - MAIS VISÍVEL */
+.nebula {
+  background: radial-gradient(
+      ellipse 300px 200px at 30% 20%,
+      rgba(147, 51, 234, 0.2) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 250px 150px at 70% 80%,
+      rgba(59, 130, 246, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 400px 300px at 50% 50%,
+      rgba(236, 72, 153, 0.1) 0%,
+      transparent 50%
+    );
+  animation: move-nebula 60s linear infinite;
+}
+
+/* Animações */
+@keyframes move-stars {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  100% {
+    transform: translateX(-200px) translateY(-200px);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes move-nebula {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-100px) translateY(-50px) rotate(360deg);
+  }
+}
+
+/* Efeito de profundidade com parallax */
+.universe-depth-1 {
+  animation-duration: 80s;
+}
+.universe-depth-2 {
+  animation-duration: 60s;
+}
+.universe-depth-3 {
+  animation-duration: 40s;
+}
+.universe-depth-4 {
+  animation-duration: 25s;
+}
