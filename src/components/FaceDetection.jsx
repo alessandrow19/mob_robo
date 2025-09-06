@@ -71,6 +71,9 @@ const FaceDetection = ({ videoElement, onFaceDetected }) => {
                 videoHeight: displaySize.height,
               });
             }
+          } else if (onFaceDetected) {
+            // Mantém os olhos centralizados quando não há faces detectadas
+            onFaceDetected({ x: 0, y: 0, direction: "center" });
           }
         }, 1000);
       }
