@@ -2,21 +2,23 @@
 
 import { useState } from "react";
 
+import { getVoiceUrl } from "../utils/pollinations.js";
+
+
 export default function VoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleClick = () => {
     if (isProcessing) return;
 
-    // Add type for SpeechRecognition if not present
-    type SpeechRecognitionType = typeof window & {
-      SpeechRecognition?: any;
-      webkitSpeechRecognition?: any;
-    };
-
     const SpeechRecognitionClass =
-      (window as SpeechRecognitionType).SpeechRecognition ||
-      (window as SpeechRecognitionType).webkitSpeechRecognition;
+      (window as Window & {
+        webkitSpeechRecognition?: typeof SpeechRecognition;
+      }).SpeechRecognition ||
+      (window as Window & {
+        webkitSpeechRecognition?: typeof SpeechRecognition;
+      }).webkitSpeechRecognition;
+
 
     if (!SpeechRecognitionClass) {
       alert("Seu navegador não suporta reconhecimento de voz.");
@@ -28,26 +30,38 @@ export default function VoiceAssistant() {
     recognition.start();
     setIsProcessing(true);
 
-    recognition.onresult = async (event: Event) => {
-      // Type assertion to access results property
-      const speechEvent = event as any;
-      const transcript = speechEvent.results[0][0].transcript;
-      try {
-        const textResponse = await fetch(
-          `https://text.pollinations.ai/${encodeURIComponent(transcript)}`
-        );
-        const answer = await textResponse.text();
-        const audioUrl = `https://pollinations.ai/api/voice/speak?text=${encodeURIComponent(
-          answer
-        )}&format=mp3`;
-        const audioResponse = await fetch(audioUrl, {
-          headers: {
-            Authorization: "Bearer yaIazPLvX25cX_7v"
+
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+        try {
+          const textResponse = await fetch(
+            `/api/pollinate?q=${encodeURIComponent(transcript)}`,
+            { cache: "no-store" }
+          );
+          if (!textResponse.ok) {
+            throw new Error("Falha ao obter texto");
           }
-        });
-        const audioBlob = await audioResponse.blob();
-        const audio = new Audio(URL.createObjectURL(audioBlob));
-        await audio.play();
+          const answer = await textResponse.text();
+        try {
+          const audioResponse = await fetch(getVoiceUrl(answer));
+          if (!audioResponse.ok) {
+            throw new Error("Falha ao obter áudio");
+          }
+          const blob = await audioResponse.blob();
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          try {
+            await audio.play();
+          } finally {
+            audio.onended = () => URL.revokeObjectURL(url);
+          }
+        } catch (audioError) {
+          console.error("Erro ao reproduzir áudio:", audioError);
+          const utterance = new SpeechSynthesisUtterance(answer);
+          utterance.lang = "pt-BR";
+          speechSynthesis.speak(utterance);
+        }
+
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
       } finally {
