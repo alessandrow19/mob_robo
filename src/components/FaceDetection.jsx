@@ -63,7 +63,13 @@ const FaceDetection = ({ videoElement, onFaceDetected }) => {
             else if (faceCenterY > videoCenterY + 50) direction = "down";
 
             if (onFaceDetected) {
-              onFaceDetected({ x: faceCenterX, y: faceCenterY, direction });
+              onFaceDetected({
+                x: faceCenterX,
+                y: faceCenterY,
+                direction,
+                videoWidth: displaySize.width,
+                videoHeight: displaySize.height,
+              });
             }
           }
         }, 1000);

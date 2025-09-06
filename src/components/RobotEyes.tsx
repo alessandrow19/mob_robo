@@ -5,17 +5,17 @@ import { useState, useEffect } from "react";
 
 type Expression = "normal" | "puppy";
 type RobotEyesProps = {
-  facePosition: { x: number; y: number };
+  facePosition: {
+    x: number;
+    y: number;
+    videoWidth: number;
+    videoHeight: number;
+  };
 };
 
 export default function RobotEyes({ facePosition }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
   const [expression, setExpression] = useState<Expression>("normal");
-  const [showHearts, setShowHearts] = useState(false);
-  const [showTears, setShowTears] = useState(false);
-  const [hearts, setHearts] = useState<
-    Array<{ id: number; x: number; y: number }>
-  >([]);
 
   // Piscar automaticamente a cada 3 segundos
   useEffect(() => {
@@ -37,15 +37,20 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
   }, []);
 
   // Calcular o deslocamento dos olhos com base na posição do rosto
-  const calculateEyePosition = (faceX: number, faceY: number) => {
+  const calculateEyePosition = (
+    faceX: number,
+    faceY: number,
+    videoWidth: number,
+    videoHeight: number
+  ) => {
     const eyeContainerWidth = 300; // Largura da div dos olhos
     const eyeContainerHeight = 200; // Altura da div dos olhos
     const helmetWidth = 500; // Largura do capacete
     const helmetHeight = 450; // Altura do capacete
 
-    // Dimensões do vídeo (conforme definido no CSS da classe .container)
-    const videoWidth = 720;
-    const videoHeight = 560;
+    // Usar as dimensões reais do vídeo ou valores padrão
+    const width = videoWidth || 720;
+    const height = videoHeight || 560;
 
     // Se não há posição válida do rosto, retorna centro (0, 0)
     if (faceX === 0 && faceY === 0) {
@@ -54,8 +59,8 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
 
     // Normalizar as coordenadas do rosto para um range de -1 a 1
     // Baseado no centro do vídeo
-    const normalizedX = (faceX - videoWidth / 2) / (videoWidth / 2);
-    const normalizedY = (faceY - videoHeight / 2) / (videoHeight / 2);
+    const normalizedX = (faceX - width / 2) / (width / 2);
+    const normalizedY = (faceY - height / 2) / (height / 2);
 
     // Calcular o movimento máximo dentro do capacete
     // Considerando que a div dos olhos precisa ficar dentro do capacete
@@ -81,7 +86,9 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
 
   const { offsetX, offsetY } = calculateEyePosition(
     facePosition.x,
-    facePosition.y
+    facePosition.y,
+    facePosition.videoWidth,
+    facePosition.videoHeight
   );
 
   // Estilos para olhinhos pidões
@@ -97,7 +104,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 helmet fixed mt-60">
+    <div className="flex flex-col items-center justify-center gap-8 helmet">
       {/* Olhos */}
       <div
         className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
@@ -105,6 +112,7 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
           transform: `translate(${offsetX}px, ${offsetY}px) ${
             isBlinking ? "scaleY(0.1)" : "scaleY(1)"
           }`,
+          ...getPuppyStyles(),
         }}
       >
         {/* Olho Esquerdo */}
