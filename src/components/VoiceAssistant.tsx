@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { getVoiceUrl } from "../utils/pollinations.js";
+
 
 export default function VoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,6 +19,7 @@ export default function VoiceAssistant() {
         webkitSpeechRecognition?: typeof SpeechRecognition;
       }).webkitSpeechRecognition;
 
+
     if (!SpeechRecognitionClass) {
       alert("Seu navegador não suporta reconhecimento de voz.");
       return;
@@ -26,6 +29,7 @@ export default function VoiceAssistant() {
     recognition.lang = "pt-BR";
     recognition.start();
     setIsProcessing(true);
+
 
     recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
@@ -57,6 +61,7 @@ export default function VoiceAssistant() {
           utterance.lang = "pt-BR";
           speechSynthesis.speak(utterance);
         }
+
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
       } finally {
