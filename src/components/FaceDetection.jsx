@@ -65,6 +65,9 @@ const FaceDetection = ({ videoElement, onFaceDetected }) => {
             if (onFaceDetected) {
               onFaceDetected({ x: faceCenterX, y: faceCenterY, direction });
             }
+          } else if (onFaceDetected) {
+            // Mantém os olhos centralizados quando não há faces detectadas
+            onFaceDetected({ x: 0, y: 0, direction: "center" });
           }
         }, 1000);
       }
