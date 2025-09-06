@@ -29,11 +29,15 @@ export default function VoiceAssistant() {
 
     recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
-      try {
-        const textResponse = await fetch(
-          `https://text.pollinations.ai/${encodeURIComponent(transcript)}`
-        );
-        const answer = await textResponse.text();
+        try {
+          const textResponse = await fetch(
+            `/api/pollinate?q=${encodeURIComponent(transcript)}`,
+            { cache: "no-store" }
+          );
+          if (!textResponse.ok) {
+            throw new Error("Falha ao obter texto");
+          }
+          const answer = await textResponse.text();
         try {
           const audioResponse = await fetch(getVoiceUrl(answer));
           if (!audioResponse.ok) {
