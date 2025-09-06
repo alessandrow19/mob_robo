@@ -123,3 +123,15 @@ body {
     transform: scale(1.2);
   }
 }
+
+@keyframes funny-color {
+  0% {
+    filter: hue-rotate(-20deg) brightness(1.2);
+  }
+  50% {
+    filter: hue-rotate(20deg) brightness(1.4);
+  }
+  100% {
+    filter: hue-rotate(-20deg) brightness(1.2);
+  }
+}
