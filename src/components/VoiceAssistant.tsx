@@ -8,13 +8,15 @@ export default function VoiceAssistant() {
   const handleClick = () => {
     if (isProcessing) return;
 
+    // Add type for SpeechRecognition if not present
+    type SpeechRecognitionType = typeof window & {
+      SpeechRecognition?: any;
+      webkitSpeechRecognition?: any;
+    };
+
     const SpeechRecognitionClass =
-      (window as Window & {
-        webkitSpeechRecognition?: typeof SpeechRecognition;
-      }).SpeechRecognition ||
-      (window as Window & {
-        webkitSpeechRecognition?: typeof SpeechRecognition;
-      }).webkitSpeechRecognition;
+      (window as SpeechRecognitionType).SpeechRecognition ||
+      (window as SpeechRecognitionType).webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
       alert("Seu navegador não suporta reconhecimento de voz.");
@@ -26,8 +28,10 @@ export default function VoiceAssistant() {
     recognition.start();
     setIsProcessing(true);
 
-    recognition.onresult = async (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript;
+    recognition.onresult = async (event: Event) => {
+      // Type assertion to access results property
+      const speechEvent = event as any;
+      const transcript = speechEvent.results[0][0].transcript;
       try {
         const textResponse = await fetch(
           `https://text.pollinations.ai/${encodeURIComponent(transcript)}`
@@ -35,7 +39,7 @@ export default function VoiceAssistant() {
         const answer = await textResponse.text();
         const audioUrl = `https://pollinations.ai/api/voice/speak?text=${encodeURIComponent(
           answer
-        )}`;
+        )}&format=mp3`;
         const audio = new Audio(audioUrl);
         await audio.play();
       } catch (error) {
