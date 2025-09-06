@@ -5,6 +5,7 @@ import VideoStream from "@/components/VideoStream";
 import RobotEyes from "@/components/RobotEyes";
 import { useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
+import VoiceAssistant from "@/components/VoiceAssistant";
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -17,8 +18,9 @@ export default function Home() {
   const [currentDirection, setCurrentDirection] = useState("center"); // Estado para a direção atual
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
-      <div className="m-auto">
+      <div className="m-auto flex flex-col items-center">
         <RobotEyes facePosition={facePosition} />
+        <VoiceAssistant />
       </div>
       <div className="container">
         <div className="fixed bottom-3 left-3">
