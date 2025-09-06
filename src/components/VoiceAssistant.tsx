@@ -40,7 +40,13 @@ export default function VoiceAssistant() {
         const audioUrl = `https://pollinations.ai/api/voice/speak?text=${encodeURIComponent(
           answer
         )}&format=mp3`;
-        const audio = new Audio(audioUrl);
+        const audioResponse = await fetch(audioUrl, {
+          headers: {
+            Authorization: "Bearer yaIazPLvX25cX_7v"
+          }
+        });
+        const audioBlob = await audioResponse.blob();
+        const audio = new Audio(URL.createObjectURL(audioBlob));
         await audio.play();
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
