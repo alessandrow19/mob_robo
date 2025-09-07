@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { getVoiceUrl } from "../utils/pollinations.js";
 
 type VoiceAssistantProps = {
@@ -10,6 +10,25 @@ type VoiceAssistantProps = {
   onEnd?: () => void;
 };
 
+interface CustomSpeechRecognitionEvent extends Event {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognition {
+  lang: string;
+  start: () => void;
+  abort?: () => void;
+  stop?: () => void;
+  onresult: ((event: CustomSpeechRecognitionEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+}
+
+interface SpeechRecognitionWindow extends Window {
+  webkitSpeechRecognition?: new () => SpeechRecognition;
+  SpeechRecognition?: new () => SpeechRecognition;
+}
+
 export default function VoiceAssistant({
   trigger,
   stopTrigger = 0,
@@ -18,9 +37,9 @@ export default function VoiceAssistant({
 }: VoiceAssistantProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const stopProcessing = () => {
+  const stopProcessing = useCallback(() => {
     try {
       recognitionRef.current?.abort?.();
       recognitionRef.current?.stop?.();
@@ -34,30 +53,11 @@ export default function VoiceAssistant({
       audioRef.current = null;
     }
     setIsProcessing(false);
-    onEnd && onEnd();
-  };
+    if (onEnd) onEnd();
+  }, [onEnd]);
 
-  const startListening = () => {
+  const startListening = useCallback(() => {
     if (isProcessing) return;
-
-    // Insert CustomSpeechRecognitionEvent interface
-    interface CustomSpeechRecognitionEvent extends Event {
-      readonly resultIndex: number;
-      readonly results: SpeechRecognitionResultList;
-    }
-
-    // Add SpeechRecognition type for TypeScript
-    type SpeechRecognition = {
-      lang: string;
-      start: () => void;
-      onresult: ((event: CustomSpeechRecognitionEvent) => void) | null;
-      onerror: ((event: Event) => void) | null;
-    };
-
-    interface SpeechRecognitionWindow extends Window {
-      webkitSpeechRecognition?: new () => SpeechRecognition;
-      SpeechRecognition?: new () => SpeechRecognition;
-    }
 
     const SpeechRecognitionClass =
       (window as SpeechRecognitionWindow).SpeechRecognition ||
@@ -73,7 +73,7 @@ export default function VoiceAssistant({
     recognition.start();
     recognitionRef.current = recognition;
     setIsProcessing(true);
-    onStart && onStart();
+    if (onStart) onStart();
 
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
@@ -141,26 +141,26 @@ export default function VoiceAssistant({
         setIsProcessing(false);
         recognitionRef.current = null;
         audioRef.current = null;
-        onEnd && onEnd();
+        if (onEnd) onEnd();
       }
     };
 
     recognition.onerror = () => {
       setIsProcessing(false);
       recognitionRef.current = null;
-      onEnd && onEnd();
+      if (onEnd) onEnd();
     };
-  };
+  }, [isProcessing, onStart, onEnd]);
 
   useEffect(() => {
     if (trigger > 0) startListening();
-  }, [trigger]);
+  }, [trigger, startListening]);
 
   useEffect(() => {
     if (stopTrigger > 0) {
       stopProcessing();
     }
-  }, [stopTrigger]);
+  }, [stopTrigger, stopProcessing]);
 
   return null;
 }
