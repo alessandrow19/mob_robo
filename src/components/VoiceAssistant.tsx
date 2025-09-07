@@ -96,11 +96,7 @@ export default function VoiceAssistant() {
             audio.onended = () => URL.revokeObjectURL(url);
           }
         } catch (audioError) {
-          // Fallback real só se o TTS falhar
-          console.error("Erro no TTS; usando SpeechSynthesis:", audioError);
-          const utterance = new SpeechSynthesisUtterance(answer);
-          utterance.lang = "pt-BR";
-          speechSynthesis.speak(utterance);
+          console.error("Erro no TTS:", audioError);
         }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
