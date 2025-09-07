@@ -35,6 +35,7 @@ export default function Home() {
           trigger={listenTrigger}
           stopTrigger={stopTrigger}
           onStart={() => setIsListening(true)}
+          onAudioStart={() => setIsListening(false)}
           onEnd={() => setIsListening(false)}
         />
       </div>
