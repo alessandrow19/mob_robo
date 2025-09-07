@@ -4,5 +4,5 @@
  * @returns {string}
  */
 export function getVoiceUrl(text) {
-  return `https://pollinations.ai/api/voice/speak?text=${encodeURIComponent(text)}`;
+  return `https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=Shimmer`;
 }

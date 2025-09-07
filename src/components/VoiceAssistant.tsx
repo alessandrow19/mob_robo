@@ -12,12 +12,8 @@ export default function VoiceAssistant() {
     if (isProcessing) return;
 
     const SpeechRecognitionClass =
-      (window as Window & {
-        webkitSpeechRecognition?: typeof SpeechRecognition;
-      }).SpeechRecognition ||
-      (window as Window & {
-        webkitSpeechRecognition?: typeof SpeechRecognition;
-      }).webkitSpeechRecognition;
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
 
 
     if (!SpeechRecognitionClass) {
@@ -31,32 +27,51 @@ export default function VoiceAssistant() {
     setIsProcessing(true);
 
 
-    recognition.onresult = async (event: SpeechRecognitionEvent) => {
+    recognition.onresult = async (event :any) => {
       const transcript = event.results[0][0].transcript;
-        try {
-          const textResponse = await fetch(
-            `/api/pollinate?q=${encodeURIComponent(transcript)}`,
-            { cache: "no-store" }
-          );
+      // Prompt para restringir respostas à astronomia
+      const astronomyPrompt = `Responda apenas perguntas sobre astronomia. Pergunta: ${transcript}`;
+      try {
+        const textResponse = await fetch(
+          `/api/pollinate?q=${encodeURIComponent(astronomyPrompt)}`,
+          { cache: "no-store" }
+        );
           if (!textResponse.ok) {
             throw new Error("Falha ao obter texto");
           }
           const answer = await textResponse.text();
         try {
-          const audioResponse = await fetch(getVoiceUrl(answer));
+            const audioResponse = await fetch(getVoiceUrl(answer), {
+              headers: {
+                Authorization: "Bearer x8ufgVqJT9VwBQo7"
+              }
+            });
           if (!audioResponse.ok) {
+            console.error("Falha ao obter áudio do Pollinations", audioResponse.status, audioResponse.statusText);
             throw new Error("Falha ao obter áudio");
           }
           const blob = await audioResponse.blob();
+          if (blob.size === 0) {
+            console.error("Blob de áudio vazio");
+            throw new Error("Áudio vazio");
+          }
           const url = URL.createObjectURL(blob);
           const audio = new Audio(url);
+          let playPromise;
           try {
-            await audio.play();
+            playPromise = audio.play();
+            if (playPromise !== undefined) {
+              await playPromise;
+            }
+          } catch (playError) {
+            console.error("Erro ao tentar reproduzir áudio gerado pelo Pollinations:", playError);
+            throw playError;
           } finally {
             audio.onended = () => URL.revokeObjectURL(url);
           }
         } catch (audioError) {
-          console.error("Erro ao reproduzir áudio:", audioError);
+          // Só cai aqui se realmente não conseguir tocar o áudio do Pollinations
+          console.error("Erro final ao reproduzir áudio Pollinations, usando fallback SpeechSynthesis:", audioError);
           const utterance = new SpeechSynthesisUtterance(answer);
           utterance.lang = "pt-BR";
           speechSynthesis.speak(utterance);
