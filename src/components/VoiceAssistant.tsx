@@ -9,6 +9,20 @@ export default function VoiceAssistant() {
   const handleClick = () => {
     if (isProcessing) return;
 
+    // Insert CustomSpeechRecognitionEvent interface
+    interface CustomSpeechRecognitionEvent extends Event {
+      readonly resultIndex: number;
+      readonly results: SpeechRecognitionResultList;
+    }
+
+    // Add SpeechRecognition type for TypeScript
+    type SpeechRecognition = {
+      lang: string;
+      start: () => void;
+      onresult: ((event: CustomSpeechRecognitionEvent) => void) | null;
+      onerror: ((event: Event) => void) | null;
+    };
+
     interface SpeechRecognitionWindow extends Window {
       webkitSpeechRecognition?: new () => SpeechRecognition;
       SpeechRecognition?: new () => SpeechRecognition;
@@ -28,7 +42,7 @@ export default function VoiceAssistant() {
     recognition.start();
     setIsProcessing(true);
 
-    recognition.onresult = async (event: SpeechRecognitionEvent) => {
+    recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
 
       // limite o tema conforme seu prompt
