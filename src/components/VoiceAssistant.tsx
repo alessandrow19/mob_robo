@@ -8,6 +8,7 @@ type VoiceAssistantProps = {
   stopTrigger?: number;
   onStart?: () => void;
   onEnd?: () => void;
+  onAudioStart?: () => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -34,6 +35,7 @@ export default function VoiceAssistant({
   stopTrigger = 0,
   onStart,
   onEnd,
+  onAudioStart,
 }: VoiceAssistantProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -123,6 +125,7 @@ export default function VoiceAssistant({
           try {
             const playPromise = audio.play();
             if (playPromise !== undefined) await playPromise;
+            if (onAudioStart) onAudioStart();
           } catch (playError) {
             console.error("Erro ao reproduzir áudio do Pollinations:", playError);
             throw playError;
@@ -150,7 +153,7 @@ export default function VoiceAssistant({
       recognitionRef.current = null;
       if (onEnd) onEnd();
     };
-  }, [isProcessing, onStart, onEnd]);
+  }, [isProcessing, onStart, onEnd, onAudioStart]);
 
   useEffect(() => {
     if (trigger > 0) startListening();
