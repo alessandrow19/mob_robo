@@ -33,7 +33,7 @@ export default function VoiceAssistant() {
       (window as SpeechRecognitionWindow).webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
-      alert("Seu navegador não suporta reconhecimento de voz.");
+      alert("Seu navegador não suporta o reconhecimento de voz.");
       return;
     }
 
