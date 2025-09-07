@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from "react";
 import * as faceapi from "face-api.js";
 import "./FaceDetection.css";
 
-const FaceDetection = ({ videoElement, onFaceDetected }) => {
+const FaceDetection = ({ videoElement, onFaceDetected, onSmile }) => {
   const canvasRef = useRef(null);
+  const isSmilingRef = useRef(false);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -26,7 +27,8 @@ const FaceDetection = ({ videoElement, onFaceDetected }) => {
         setInterval(async () => {
           const detections = await faceapi
             .detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks();
+            .withFaceLandmarks()
+            .withFaceExpressions();
           const resizedDetections = faceapi.resizeResults(
             detections,
             displaySize
@@ -71,9 +73,21 @@ const FaceDetection = ({ videoElement, onFaceDetected }) => {
                 videoHeight: displaySize.height,
               });
             }
-          } else if (onFaceDetected) {
+
+            if (onSmile) {
+              const smiling = detections[0].expressions?.happy > 0.7;
+              if (smiling && !isSmilingRef.current) {
+                isSmilingRef.current = true;
+                onSmile();
+              } else if (!smiling) {
+                isSmilingRef.current = false;
+              }
+            }
+          } else {
             // Mantém os olhos centralizados quando não há faces detectadas
-            onFaceDetected({ x: 0, y: 0, direction: "center" });
+            if (onFaceDetected)
+              onFaceDetected({ x: 0, y: 0, direction: "center" });
+            if (onSmile) isSmilingRef.current = false;
           }
         }, 1000);
       }
