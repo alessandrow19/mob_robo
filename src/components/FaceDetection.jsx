@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from "react";
 import * as faceapi from "face-api.js";
 import "./FaceDetection.css";
 
-const FaceDetection = ({ videoElement, onFaceDetected, onSmile }) => {
+const FaceDetection = ({ videoElement, onFaceDetected, onSmile, onAngry }) => {
   const canvasRef = useRef(null);
   const isSmilingRef = useRef(false);
+  const isAngryRef = useRef(false);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -83,11 +84,22 @@ const FaceDetection = ({ videoElement, onFaceDetected, onSmile }) => {
                 isSmilingRef.current = false;
               }
             }
+
+            if (onAngry) {
+              const angry = detections[0].expressions?.angry > 0.7;
+              if (angry && !isAngryRef.current) {
+                isAngryRef.current = true;
+                onAngry();
+              } else if (!angry) {
+                isAngryRef.current = false;
+              }
+            }
           } else {
             // Mantém os olhos centralizados quando não há faces detectadas
             if (onFaceDetected)
               onFaceDetected({ x: 0, y: 0, direction: "center" });
             if (onSmile) isSmilingRef.current = false;
+            if (onAngry) isAngryRef.current = false;
           }
         }, 1000);
       }
