@@ -50,7 +50,10 @@ export default function RobotEyes({
 
   return isListening ? (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
-      <div className="text-[120px] animate-pulse">?</div>
+      <div className="relative flex items-center justify-center">
+        <div className="question-glow"></div>
+        <div className="question-icon text-[120px]">?</div>
+      </div>
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center gap-8 helmet">

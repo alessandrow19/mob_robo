@@ -18,9 +18,14 @@ export default function Home() {
   const [currentDirection, setCurrentDirection] = useState("center"); // Estado para a direção atual
   const [listenTrigger, setListenTrigger] = useState(0);
   const [isListening, setIsListening] = useState(false);
+  const [stopTrigger, setStopTrigger] = useState(0);
 
   const handleSmile = () => {
     if (!isListening) setListenTrigger((t) => t + 1);
+  };
+
+  const handleAngry = () => {
+    if (isListening) setStopTrigger((t) => t + 1);
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
@@ -28,6 +33,7 @@ export default function Home() {
         <RobotEyes facePosition={facePosition} isListening={isListening} />
         <VoiceAssistant
           trigger={listenTrigger}
+          stopTrigger={stopTrigger}
           onStart={() => setIsListening(true)}
           onEnd={() => setIsListening(false)}
         />
@@ -57,6 +63,7 @@ export default function Home() {
                 setCurrentDirection(direction); // Atualiza a direção
               }}
               onSmile={handleSmile}
+              onAngry={handleAngry}
             />
           )}
         </div>

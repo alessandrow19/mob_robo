@@ -1,20 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getVoiceUrl } from "../utils/pollinations.js";
 
 type VoiceAssistantProps = {
   trigger: number;
+  stopTrigger?: number;
   onStart?: () => void;
   onEnd?: () => void;
 };
 
 export default function VoiceAssistant({
   trigger,
+  stopTrigger = 0,
   onStart,
   onEnd,
 }: VoiceAssistantProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recognitionRef = useRef<any>(null);
+
+  const stopProcessing = () => {
+    try {
+      recognitionRef.current?.abort?.();
+      recognitionRef.current?.stop?.();
+    } catch (e) {
+      console.error(e);
+    }
+    recognitionRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setIsProcessing(false);
+    onEnd && onEnd();
+  };
 
   const startListening = () => {
     if (isProcessing) return;
@@ -50,6 +71,7 @@ export default function VoiceAssistant({
     const recognition = new SpeechRecognitionClass();
     recognition.lang = "pt-BR";
     recognition.start();
+    recognitionRef.current = recognition;
     setIsProcessing(true);
     onStart && onStart();
 
@@ -96,6 +118,7 @@ export default function VoiceAssistant({
 
           const url = URL.createObjectURL(blob);
           const audio = new Audio(url);
+          audioRef.current = audio;
 
           try {
             const playPromise = audio.play();
@@ -104,7 +127,10 @@ export default function VoiceAssistant({
             console.error("Erro ao reproduzir áudio do Pollinations:", playError);
             throw playError;
           } finally {
-            audio.onended = () => URL.revokeObjectURL(url);
+            audio.onended = () => {
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+            };
           }
         } catch (audioError) {
           console.error("Erro no TTS:", audioError);
@@ -113,12 +139,15 @@ export default function VoiceAssistant({
         console.error("Erro ao obter resposta:", error);
       } finally {
         setIsProcessing(false);
+        recognitionRef.current = null;
+        audioRef.current = null;
         onEnd && onEnd();
       }
     };
 
     recognition.onerror = () => {
       setIsProcessing(false);
+      recognitionRef.current = null;
       onEnd && onEnd();
     };
   };
@@ -126,6 +155,12 @@ export default function VoiceAssistant({
   useEffect(() => {
     if (trigger > 0) startListening();
   }, [trigger]);
+
+  useEffect(() => {
+    if (stopTrigger > 0) {
+      stopProcessing();
+    }
+  }, [stopTrigger]);
 
   return null;
 }

@@ -135,3 +135,48 @@ body {
     filter: hue-rotate(-20deg) brightness(1.2);
   }
 }
+
+.question-icon {
+  color: #00eaff;
+  animation: question-pulse 1.6s ease-in-out infinite, funny-color 1.2s ease-in-out infinite;
+  text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
+  position: relative;
+  z-index: 2;
+}
+
+.question-glow {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 234, 255, 0.4) 0%, rgba(0, 234, 255, 0.05) 70%, transparent 80%);
+  animation: question-glow-pulse 2s ease-in-out infinite;
+  filter: blur(4px);
+  z-index: 1;
+}
+
+@keyframes question-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+    text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    text-shadow: 0 0 25px #00eaff, 0 0 35px #00eaff;
+  }
+}
+
+@keyframes question-glow-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
