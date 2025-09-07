@@ -9,9 +9,14 @@ export default function VoiceAssistant() {
   const handleClick = () => {
     if (isProcessing) return;
 
+    interface SpeechRecognitionWindow extends Window {
+      webkitSpeechRecognition?: new () => SpeechRecognition;
+      SpeechRecognition?: new () => SpeechRecognition;
+    }
+
     const SpeechRecognitionClass =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+      (window as SpeechRecognitionWindow).SpeechRecognition ||
+      (window as SpeechRecognitionWindow).webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
       alert("Seu navegador não suporta reconhecimento de voz.");
@@ -23,7 +28,7 @@ export default function VoiceAssistant() {
     recognition.start();
     setIsProcessing(true);
 
-    recognition.onresult = async (event: any) => {
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
 
       // limite o tema conforme seu prompt
