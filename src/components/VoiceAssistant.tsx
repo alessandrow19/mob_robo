@@ -45,13 +45,13 @@ export default function VoiceAssistant() {
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
 
-      // limite o tema conforme seu prompt
-      const astronomyPrompt = `Responda apenas em idioma portugues do Brasil pt BR e somente perguntas sobre astronomia. Pergunta: ${transcript}`;
+      // improved prompt with clearer instructions in Brazilian Portuguese
+      const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
         const textResponse = await fetch(
           `/api/pollinate?q=${encodeURIComponent(astronomyPrompt)}`,
-          { cache: "no-store" }
+          { cache: "no-store", headers: { "Accept-Language": "pt-BR" } }
         );
         if (!textResponse.ok) throw new Error("Falha ao obter texto");
         const answer = await textResponse.text();
