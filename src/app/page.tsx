@@ -16,11 +16,21 @@ export default function Home() {
     videoHeight: 0,
   });
   const [currentDirection, setCurrentDirection] = useState("center"); // Estado para a direção atual
+  const [listenTrigger, setListenTrigger] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+
+  const handleSmile = () => {
+    if (!isListening) setListenTrigger((t) => t + 1);
+  };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
       <div className="m-auto flex flex-col items-center">
-        <RobotEyes facePosition={facePosition} />
-        <VoiceAssistant />
+        <RobotEyes facePosition={facePosition} isListening={isListening} />
+        <VoiceAssistant
+          trigger={listenTrigger}
+          onStart={() => setIsListening(true)}
+          onEnd={() => setIsListening(false)}
+        />
       </div>
       <div className="container">
         <div className="fixed bottom-3 left-3">
@@ -46,6 +56,7 @@ export default function Home() {
                 setFacePosition({ x, y, videoWidth, videoHeight }); // Atualiza a posição do rosto
                 setCurrentDirection(direction); // Atualiza a direção
               }}
+              onSmile={handleSmile}
             />
           )}
         </div>
