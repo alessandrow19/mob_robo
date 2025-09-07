@@ -16,9 +16,13 @@ type RobotEyesProps = {
     videoWidth: number;
     videoHeight: number;
   };
+  isListening?: boolean;
 };
 
-export default function RobotEyes({ facePosition }: RobotEyesProps) {
+export default function RobotEyes({
+  facePosition,
+  isListening = false,
+}: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
 
   useEffect(() => {
@@ -44,7 +48,11 @@ export default function RobotEyes({ facePosition }: RobotEyesProps) {
 
   const expressionStyles = getExpressionStyles(expression);
 
-  return (
+  return isListening ? (
+    <div className="flex flex-col items-center justify-center gap-8 helmet">
+      <div className="text-[120px] question-icon">?</div>
+    </div>
+  ) : (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
       {/* Olhos */}
       <div

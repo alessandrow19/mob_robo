@@ -1,12 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getVoiceUrl } from "../utils/pollinations.js";
 
-export default function VoiceAssistant() {
-  const [isProcessing, setIsProcessing] = useState(false);
+type VoiceAssistantProps = {
+  trigger: number;
+  stop: number;
+  onStart?: () => void;
+  onEnd?: () => void;
+};
 
-  const handleClick = () => {
+type SpeechRecognition = {
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: ((event: Event) => void) | null;
+  onerror: ((event: Event) => void) | null;
+};
+
+export default function VoiceAssistant({
+  trigger,
+  stop,
+  onStart,
+  onEnd,
+}: VoiceAssistantProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const startListening = () => {
     if (isProcessing) return;
 
     // Insert CustomSpeechRecognitionEvent interface
@@ -14,14 +36,6 @@ export default function VoiceAssistant() {
       readonly resultIndex: number;
       readonly results: SpeechRecognitionResultList;
     }
-
-    // Add SpeechRecognition type for TypeScript
-    type SpeechRecognition = {
-      lang: string;
-      start: () => void;
-      onresult: ((event: CustomSpeechRecognitionEvent) => void) | null;
-      onerror: ((event: Event) => void) | null;
-    };
 
     interface SpeechRecognitionWindow extends Window {
       webkitSpeechRecognition?: new () => SpeechRecognition;
@@ -40,7 +54,9 @@ export default function VoiceAssistant() {
     const recognition = new SpeechRecognitionClass();
     recognition.lang = "pt-BR";
     recognition.start();
+    recognitionRef.current = recognition;
     setIsProcessing(true);
+    onStart && onStart();
 
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
@@ -85,6 +101,7 @@ export default function VoiceAssistant() {
 
           const url = URL.createObjectURL(blob);
           const audio = new Audio(url);
+          audioRef.current = audio;
 
           try {
             const playPromise = audio.play();
@@ -92,29 +109,47 @@ export default function VoiceAssistant() {
           } catch (playError) {
             console.error("Erro ao reproduzir áudio do Pollinations:", playError);
             throw playError;
-          } finally {
-            audio.onended = () => URL.revokeObjectURL(url);
           }
+
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            audioRef.current = null;
+            setIsProcessing(false);
+            onEnd && onEnd();
+          };
         } catch (audioError) {
           console.error("Erro no TTS:", audioError);
+          setIsProcessing(false);
+          onEnd && onEnd();
         }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
-      } finally {
         setIsProcessing(false);
+        onEnd && onEnd();
       }
     };
 
-    recognition.onerror = () => setIsProcessing(false);
+    recognition.onerror = () => {
+      setIsProcessing(false);
+      onEnd && onEnd();
+    };
   };
 
-  return (
-    <button
-      onClick={handleClick}
-      disabled={isProcessing}
-      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-    >
-      {isProcessing ? "Escutando..." : "Fale com o Robô"}
-    </button>
-  );
+  useEffect(() => {
+    if (trigger > 0) startListening();
+  }, [trigger]);
+
+  useEffect(() => {
+    if (stop > 0) {
+      recognitionRef.current?.stop();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setIsProcessing(false);
+      onEnd && onEnd();
+    }
+  }, [stop]);
+
+  return null;
 }
