@@ -5,4 +5,7 @@ interface SpeechRecognition {
   onerror: ((event: Event) => void) | null;
 }
 
-type SpeechRecognitionEvent = any;
+interface SpeechRecognitionEvent extends Event {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultList;
+}
