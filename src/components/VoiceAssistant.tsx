@@ -60,14 +60,20 @@ export default function VoiceAssistant() {
           // ❌ Sem Authorization aqui — evita CORS preflight
           const audioResponse = await fetch(getVoiceUrl(answer), {
             // ajuda alguns browsers a escolherem o decodificador
-            headers: { Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8" },
+            headers: {
+              Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
+              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
+            },
             cache: "no-store",
             mode: "cors",
           });
 
           if (!audioResponse.ok) {
-            console.error("Falha ao obter áudio do Pollinations",
-              audioResponse.status, audioResponse.statusText);
+            console.error(
+              "Falha ao obter áudio do Pollinations",
+              audioResponse.status,
+              audioResponse.statusText
+            );
             throw new Error("Falha ao obter áudio");
           }
 
