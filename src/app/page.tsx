@@ -19,6 +19,7 @@ export default function Home() {
   const [listenTrigger, setListenTrigger] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [stopTrigger, setStopTrigger] = useState(0);
+  const [showRobotFace, setShowRobotFace] = useState(false);
 
   const handleSmile = () => {
     if (!isListening) setListenTrigger((t) => t + 1);
@@ -29,46 +30,56 @@ export default function Home() {
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
-      <div className="m-auto flex flex-col items-center">
-        <RobotEyes facePosition={facePosition} isListening={isListening} />
-        <VoiceAssistant
-          trigger={listenTrigger}
-          stopTrigger={stopTrigger}
-          onStart={() => setIsListening(true)}
-          onAudioStart={() => setIsListening(false)}
-          onEnd={() => setIsListening(false)}
-        />
-      </div>
-      <div className="container">
-        <div className="fixed bottom-3 left-3">
-          <VideoStream onVideoReady={setVideoElement} />
-
-          {/* Componente de detecção facial */}
-          {videoElement && (
-            <FaceDetection
-              videoElement={videoElement}
-              onFaceDetected={({
-                x,
-                y,
-                direction,
-                videoWidth,
-                videoHeight,
-              }: {
-                x: number;
-                y: number;
-                direction: string;
-                videoWidth: number;
-                videoHeight: number;
-              }) => {
-                setFacePosition({ x, y, videoWidth, videoHeight }); // Atualiza a posição do rosto
-                setCurrentDirection(direction); // Atualiza a direção
-              }}
-              onSmile={handleSmile}
-              onAngry={handleAngry}
-            />
-          )}
+      <VoiceAssistant
+        trigger={listenTrigger}
+        stopTrigger={stopTrigger}
+        onStart={() => setIsListening(true)}
+        onAudioStart={() => {
+          setIsListening(false);
+          setShowRobotFace(true);
+        }}
+        onEnd={() => {
+          setIsListening(false);
+          setShowRobotFace(false);
+        }}
+      />
+      {(isListening || showRobotFace) && (
+        <div className="m-auto flex flex-col items-center">
+          <RobotEyes facePosition={facePosition} isListening={isListening} />
         </div>
-      </div>
+      )}
+      {!(isListening || showRobotFace) && (
+        <div className="container">
+          <div className="fixed bottom-3 left-3">
+            <VideoStream onVideoReady={setVideoElement} />
+
+            {/* Componente de detecção facial */}
+            {videoElement && (
+              <FaceDetection
+                videoElement={videoElement}
+                onFaceDetected={({
+                  x,
+                  y,
+                  direction,
+                  videoWidth,
+                  videoHeight,
+                }: {
+                  x: number;
+                  y: number;
+                  direction: string;
+                  videoWidth: number;
+                  videoHeight: number;
+                }) => {
+                  setFacePosition({ x, y, videoWidth, videoHeight }); // Atualiza a posição do rosto
+                  setCurrentDirection(direction); // Atualiza a direção
+                }}
+                onSmile={handleSmile}
+                onAngry={handleAngry}
+              />
+            )}
+          </div>
+        </div>
+      )}
       {/* Adicione o componente DirectionTracker */}
       <DirectionTracker direction={currentDirection} />
     </div>
