@@ -4,7 +4,7 @@ const {
   calculateEyePosition,
   determineExpression,
   getExpressionStyles
-} = require('../build/robotEyesUtils.js');
+} = require('../build/components/robotEyesUtils.js');
 
 test('centers eyes when no face detected', () => {
   const { offsetX, offsetY } = calculateEyePosition(0, 0, 720, 560);

@@ -11,7 +11,7 @@ require.cache[require.resolve('next/image')] = {
   },
 };
 
-const RobotEyes = require('../build/RobotEyes.js').default;
+const RobotEyes = require('../build/components/RobotEyes.js').default;
 
 const facePos = { x: 0, y: 0, videoWidth: 0, videoHeight: 0 };
 
