@@ -40,8 +40,13 @@ export default function VoiceAssistant({
   const [isProcessing, setIsProcessing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const stopProcessing = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     try {
       recognitionRef.current?.abort?.();
       recognitionRef.current?.stop?.();
@@ -77,7 +82,15 @@ export default function VoiceAssistant({
     setIsProcessing(true);
     if (onStart) onStart();
 
+    timeoutRef.current = window.setTimeout(() => {
+      stopProcessing();
+    }, 10000);
+
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       const transcript = event.results[0][0].transcript;
 
       // improved prompt with clearer instructions in Brazilian Portuguese
@@ -97,7 +110,6 @@ export default function VoiceAssistant({
             // ajuda alguns browsers a escolherem o decodificador
             headers: {
               Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
-              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
             },
             cache: "no-store",
             mode: "cors",
@@ -149,11 +161,15 @@ export default function VoiceAssistant({
     };
 
     recognition.onerror = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setIsProcessing(false);
       recognitionRef.current = null;
       if (onEnd) onEnd();
     };
-  }, [isProcessing, onStart, onEnd, onAudioStart]);
+  }, [isProcessing, onStart, onEnd, onAudioStart, stopProcessing]);
 
   useEffect(() => {
     if (trigger > 0) startListening();
