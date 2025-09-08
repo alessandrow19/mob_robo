@@ -19,7 +19,7 @@ export default function Home() {
   const [listenTrigger, setListenTrigger] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [stopTrigger, setStopTrigger] = useState(0);
-  const [showRobotFace, setShowRobotFace] = useState(false);
+  const [isTalking, setIsTalking] = useState(false);
 
   const handleSmile = () => {
     if (!isListening) setListenTrigger((t) => t + 1);
@@ -36,19 +36,17 @@ export default function Home() {
         onStart={() => setIsListening(true)}
         onAudioStart={() => {
           setIsListening(false);
-          setShowRobotFace(true);
+          setIsTalking(true);
         }}
         onEnd={() => {
           setIsListening(false);
-          setShowRobotFace(false);
+          setIsTalking(false);
         }}
       />
-      {(isListening || showRobotFace) && (
-        <div className="m-auto flex flex-col items-center">
-          <RobotEyes facePosition={facePosition} isListening={isListening} />
-        </div>
-      )}
-      {!(isListening || showRobotFace) && (
+      <div className="m-auto flex flex-col items-center">
+        <RobotEyes facePosition={facePosition} isListening={isListening} />
+      </div>
+      {!(isListening || isTalking) && (
         <div className="container">
           <div className="fixed bottom-3 left-3">
             <VideoStream onVideoReady={setVideoElement} />
