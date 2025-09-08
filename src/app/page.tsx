@@ -6,6 +6,10 @@ import RobotEyes from "@/components/RobotEyes";
 import { useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
+import {
+  handleSmileInteraction,
+  handleAngryInteraction,
+} from "@/utils/interactionHandlers";
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -21,13 +25,11 @@ export default function Home() {
   const [stopTrigger, setStopTrigger] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
 
-  const handleSmile = () => {
-    if (!isListening) setListenTrigger((t) => t + 1);
-  };
+  const handleSmile = () =>
+    handleSmileInteraction(isListening, setIsListening, setListenTrigger);
 
-  const handleAngry = () => {
-    if (isListening) setStopTrigger((t) => t + 1);
-  };
+  const handleAngry = () =>
+    handleAngryInteraction(isListening, setStopTrigger);
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
       <VoiceAssistant
