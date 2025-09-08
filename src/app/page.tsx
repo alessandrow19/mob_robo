@@ -48,38 +48,36 @@ export default function Home() {
       <div className="m-auto flex flex-col items-center">
         <RobotEyes facePosition={facePosition} isListening={isListening} />
       </div>
-      {!(isListening || isTalking) && (
-        <div className="container">
-          <div className="fixed bottom-3 left-3">
-            <VideoStream onVideoReady={setVideoElement} />
+      <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
+        <div className="fixed bottom-3 left-3">
+          <VideoStream onVideoReady={setVideoElement} />
 
-            {/* Componente de detecção facial */}
-            {videoElement && (
-              <FaceDetection
-                videoElement={videoElement}
-                onFaceDetected={({
-                  x,
-                  y,
-                  direction,
-                  videoWidth,
-                  videoHeight,
-                }: {
-                  x: number;
-                  y: number;
-                  direction: string;
-                  videoWidth: number;
-                  videoHeight: number;
-                }) => {
-                  setFacePosition({ x, y, videoWidth, videoHeight }); // Atualiza a posição do rosto
-                  setCurrentDirection(direction); // Atualiza a direção
-                }}
-                onSmile={handleSmile}
-                onAngry={handleAngry}
-              />
-            )}
-          </div>
+          {/* Componente de detecção facial */}
+          {videoElement && (
+            <FaceDetection
+              videoElement={videoElement}
+              onFaceDetected={({
+                x,
+                y,
+                direction,
+                videoWidth,
+                videoHeight,
+              }: {
+                x: number;
+                y: number;
+                direction: string;
+                videoWidth: number;
+                videoHeight: number;
+              }) => {
+                setFacePosition({ x, y, videoWidth, videoHeight }); // Atualiza a posição do rosto
+                setCurrentDirection(direction); // Atualiza a direção
+              }}
+              onSmile={handleSmile}
+              onAngry={handleAngry}
+            />
+          )}
         </div>
-      )}
+      </div>
       {/* Adicione o componente DirectionTracker */}
       <DirectionTracker direction={currentDirection} />
     </div>
