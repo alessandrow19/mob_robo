@@ -17,11 +17,13 @@ type RobotEyesProps = {
     videoHeight: number;
   };
   isListening?: boolean;
+  isProcessing?: boolean; // Nova prop para indicar processamento de áudio
 };
 
 export default function RobotEyes({
   facePosition,
   isListening = false,
+  isProcessing = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
 
@@ -48,14 +50,20 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  return isListening ? (
-    <div className="flex flex-col items-center justify-center gap-8 helmet">
-      <div className="relative flex items-center justify-center">
-        <div className="question-glow"></div>
-        <div className="question-icon text-[120px]">?</div>
+  // Se está ouvindo e não está processando áudio, mostra interrogação
+  if (isListening && !isProcessing) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-8 helmet">
+        <div className="relative flex items-center justify-center">
+          <div className="question-glow"></div>
+          <div className="question-icon text-[120px]">?</div>
+        </div>
       </div>
-    </div>
-  ) : (
+    );
+  }
+
+  // Caso contrário, mostra os olhos normalmente
+  return (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
       {/* Olhos */}
       <div

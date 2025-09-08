@@ -28,8 +28,7 @@ export default function Home() {
   const handleSmile = () =>
     handleSmileInteraction(isListening, setIsListening, setListenTrigger);
 
-  const handleAngry = () =>
-    handleAngryInteraction(isListening, setStopTrigger);
+  const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
       <VoiceAssistant
@@ -46,7 +45,11 @@ export default function Home() {
         }}
       />
       <div className="m-auto flex flex-col items-center">
-        <RobotEyes facePosition={facePosition} isListening={isListening} />
+        <RobotEyes
+          facePosition={facePosition}
+          isListening={isListening}
+          isProcessing={isTalking}
+        />
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
         <div className="fixed bottom-3 left-3">
@@ -83,4 +86,3 @@ export default function Home() {
     </div>
   );
 }
-

@@ -87,6 +87,9 @@ export default function VoiceAssistant({
     }, 10000);
 
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
+      // Bloqueia múltiplas chamadas se já estiver processando
+      if (isProcessing) return;
+      setIsProcessing(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
@@ -111,9 +114,14 @@ export default function VoiceAssistant({
         const answer = await textResponse.text();
 
         try {
+          // Para o áudio anterior antes de iniciar novo
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+          }
           // ❌ Sem Authorization aqui — evita CORS preflight
           const audioResponse = await fetch(getVoiceUrl(answer), {
-            // ajuda alguns browsers a escolherem o decodificador
             headers: {
               Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
             },
@@ -145,12 +153,17 @@ export default function VoiceAssistant({
             if (playPromise !== undefined) await playPromise;
             if (onAudioStart) onAudioStart();
           } catch (playError) {
-            console.error("Erro ao reproduzir áudio do Pollinations:", playError);
+            console.error(
+              "Erro ao reproduzir áudio do Pollinations:",
+              playError
+            );
             throw playError;
           } finally {
             audio.onended = () => {
               URL.revokeObjectURL(url);
               audioRef.current = null;
+              setIsProcessing(false); // Libera para nova chamada
+              if (onEnd) onEnd();
             };
           }
         } catch (audioError) {
@@ -158,7 +171,6 @@ export default function VoiceAssistant({
         }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
-      } finally {
         setIsProcessing(false);
         recognitionRef.current = null;
         audioRef.current = null;
@@ -177,9 +189,12 @@ export default function VoiceAssistant({
     };
   }, [isProcessing, onStart, onEnd, onAudioStart, stopProcessing]);
 
+  // Só ativa se não estiver processando e trigger mudou
   useEffect(() => {
-    if (trigger > 0) startListening();
-  }, [trigger, startListening]);
+    if (trigger > 0 && !isProcessing) {
+      startListening();
+    }
+  }, [trigger, isProcessing, startListening]);
 
   useEffect(() => {
     if (stopTrigger > 0) {
