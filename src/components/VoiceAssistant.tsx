@@ -99,7 +99,13 @@ export default function VoiceAssistant({
       try {
         const textResponse = await fetch(
           `/api/pollinate?q=${encodeURIComponent(astronomyPrompt)}`,
-          { cache: "no-store", headers: { "Accept-Language": "pt-BR" } }
+          {
+            cache: "no-store",
+            headers: {
+              "Accept-Language": "pt-BR",
+              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
+            },
+          }
         );
         if (!textResponse.ok) throw new Error("Falha ao obter texto");
         const answer = await textResponse.text();
