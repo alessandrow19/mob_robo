@@ -76,9 +76,11 @@ const FaceDetection = ({ videoElement, onFaceDetected, onSmile, onAngry }) => {
             }
 
             if (onSmile) {
-              const smiling = detections[0].expressions?.happy > 0.7;
+              // Aumenta o limiar para 0.8 e adiciona log
+              const smiling = detections[0].expressions?.happy > 0.8;
               if (smiling && !isSmilingRef.current) {
                 isSmilingRef.current = true;
+                console.log("Sorriso detectado! Ativando modo escuta.");
                 onSmile();
               } else if (!smiling) {
                 isSmilingRef.current = false;

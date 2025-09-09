@@ -12,6 +12,7 @@ import {
 } from "@/utils/interactionHandlers";
 
 export default function Home() {
+  // Estado do vídeo e rosto
   const [videoElement, setVideoElement] = useState(null);
   const [facePosition, setFacePosition] = useState({
     x: 0,
@@ -19,21 +20,24 @@ export default function Home() {
     videoWidth: 0,
     videoHeight: 0,
   });
-  const [currentDirection, setCurrentDirection] = useState("center"); // Estado para a direção atual
-  const [listenTrigger, setListenTrigger] = useState(0);
+  const [currentDirection, setCurrentDirection] = useState("center");
+  // Estado para controle de escuta e fala
   const [isListening, setIsListening] = useState(false);
-  const [stopTrigger, setStopTrigger] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
 
-  const handleSmile = () =>
-    handleSmileInteraction(isListening, setIsListening, setListenTrigger);
-
-  const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
+  // Quando sorrir, inicia escuta
+  const handleSmile = () => {
+    if (!isListening && !isTalking) setIsListening(true);
+  };
+  // Quando ficar bravo, interrompe escuta
+  const handleAngry = () => {
+    if (isListening) setIsListening(false);
+  };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
+      {/* Componente de voz: escuta quando isListening=true */}
       <VoiceAssistant
-        trigger={listenTrigger}
-        stopTrigger={stopTrigger}
+        isListening={isListening}
         onStart={() => setIsListening(true)}
         onAudioStart={() => {
           setIsListening(false);
