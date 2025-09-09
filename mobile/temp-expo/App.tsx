@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import RobotEyes from './components/RobotEyes';
-import FaceDetection from './components/FaceDetection';
-import DirectionTracker from './components/DirectionTracker';
-import VoiceAssistant from './components/VoiceAssistant';
+import React, { useState } from "react";
+import { View, StyleSheet } from "react-native";
+import RobotEyes from "../components/RobotEyes";
+import FaceDetection from "../components/FaceDetection";
+import DirectionTracker from "../components/DirectionTracker";
+import VoiceAssistant from "../components/VoiceAssistant";
 
 export default function App() {
-  const [facePosition, setFacePosition] = useState({ x: 0, y: 0, videoWidth: 0, videoHeight: 0 });
-  const [currentDirection, setCurrentDirection] = useState('center');
+  const [facePosition, setFacePosition] = useState({
+    x: 0,
+    y: 0,
+    videoWidth: 0,
+    videoHeight: 0,
+  });
+  const [currentDirection, setCurrentDirection] = useState("center");
   const [isListening, setIsListening] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
 
@@ -57,8 +62,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#000",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
