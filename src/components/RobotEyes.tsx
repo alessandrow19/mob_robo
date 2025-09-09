@@ -25,8 +25,7 @@ export default function RobotEyes({
   facePosition,
   isListening = false,
   isProcessing = false,
-  onStartListening,
-}: RobotEyesProps & { onStartListening?: () => void }) {
+}: RobotEyesProps) {
   // Piscar dos olhos: alterna visibilidade a cada 3s
   const [isBlinking, setIsBlinking] = useState(false);
   useEffect(() => {
@@ -49,14 +48,9 @@ export default function RobotEyes({
 
   // Se está ouvindo e não está processando áudio, mostra interrogação
   if (isListening && !isProcessing) {
-    // Quando clicar na interrogação, chama a função de escuta
     return (
       <div className="flex flex-col items-center justify-center gap-8 helmet">
-        <div
-          className="relative flex items-center justify-center"
-          onClick={onStartListening}
-          style={{ cursor: onStartListening ? "pointer" : "default" }}
-        >
+        <div className="relative flex items-center justify-center">
           <div className="question-glow"></div>
           <div className="question-icon text-[120px]">?</div>
         </div>
