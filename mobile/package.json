@@ -7,7 +7,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "echo \"No tests\""
+    "pretest": "tsc utils/pollinations.ts --outDir build --module commonjs",
+    "test": "node --test tests",
+    "posttest": "rm -rf build"
   },
   "dependencies": {
     "expo": "~50.0.0",
