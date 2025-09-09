@@ -53,6 +53,10 @@ export default function Home() {
           facePosition={facePosition}
           isListening={isListening}
           isProcessing={isTalking}
+          onStartListening={() => {
+            if (!isListening && !isTalking) setIsListening(true);
+            console.log("Iniciar escuta via btn");
+          }}
         />
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
