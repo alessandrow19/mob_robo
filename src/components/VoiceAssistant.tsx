@@ -6,6 +6,7 @@ import { getVoiceUrl } from "../utils/pollinations.js";
 type VoiceAssistantProps = {
   trigger: number;
   stopTrigger?: number;
+  isListening?: boolean;
   onStart?: () => void;
   onEnd?: () => void;
   onAudioStart?: () => void;
@@ -33,6 +34,7 @@ interface SpeechRecognitionWindow extends Window {
 export default function VoiceAssistant({
   trigger,
   stopTrigger = 0,
+  isListening = false,
   onStart,
   onEnd,
   onAudioStart,
@@ -97,7 +99,7 @@ export default function VoiceAssistant({
       const transcript = event.results[0][0].transcript;
 
       // improved prompt with clearer instructions in Brazilian Portuguese
-      const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
+      const astronomyPrompt = `Responda sempre em português do Brasi, e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
         const textResponse = await fetch(
@@ -189,12 +191,12 @@ export default function VoiceAssistant({
     };
   }, [isProcessing, onStart, onEnd, onAudioStart, stopProcessing]);
 
-  // Só ativa se não estiver processando e trigger mudou
+  // Só ativa se não estiver processando, nem ouvindo, e trigger mudou
   useEffect(() => {
-    if (trigger > 0 && !isProcessing) {
+    if (trigger > 0 && !isProcessing && !isListening) {
       startListening();
     }
-  }, [trigger, isProcessing, startListening]);
+  }, [trigger, isProcessing, isListening, startListening]);
 
   useEffect(() => {
     if (stopTrigger > 0) {
