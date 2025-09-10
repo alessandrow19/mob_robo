@@ -57,20 +57,6 @@ export default function RobotEyes({
             <div className="question-icon text-[120px]">?</div>
           </div>
         </div>
-        {/* Botão em div separada, bem abaixo do rosto/interrogação */}
-        <div className="flex items-center justify-center mt-20">
-          <button
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all"
-            onClick={
-              typeof onStartListening === "function"
-                ? onStartListening
-                : undefined
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Iniciar escuta
-          </button>
-        </div>
       </>
     );
   }
