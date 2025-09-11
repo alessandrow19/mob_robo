@@ -63,7 +63,8 @@ export default function VoiceAssistant({
       try {
         audioRef.current.pause();
       } catch {}
-      audioRef.current = null;
+      audioRef.current.removeAttribute("src");
+      audioRef.current.load();
     }
     setPhase("idle");
     if (onEnd) onEnd();
@@ -114,12 +115,13 @@ export default function VoiceAssistant({
       // Prompt para TTS Pollinations
       const prompt = ` Responda sempre em português do Brasil, nunca use português de Portugal, nem regionalismos de Portugal. Responda apenas perguntas relacionadas à astronomia. Pergunta: ${transcript} ? `;
       // Para áudio anterior
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause();
-        } catch {}
-        audioRef.current = null;
-      }
+        if (audioRef.current) {
+          try {
+            audioRef.current.pause();
+          } catch {}
+          audioRef.current.removeAttribute("src");
+          audioRef.current.load();
+        }
 
       // Busca áudio diretamente do Pollinations TTS
       let audioResponse;
@@ -155,34 +157,29 @@ export default function VoiceAssistant({
         throw new Error("Áudio vazio");
       }
 
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio();
-      audio.preload = "auto";
-      audio.src = url;
-      audioRef.current = audio;
-
-      // Listener de término natural do áudio
-      audio.addEventListener(
-        "ended",
-        () => {
+        const url = URL.createObjectURL(blob);
+        const audio = audioRef.current!;
+        audio.preload = "auto";
+        audio.src = url;
+        audio.setAttribute("playsinline", "true");
+        audio.onended = () => {
           URL.revokeObjectURL(url);
-          audioRef.current = null;
+          audio.removeAttribute("src");
+          audio.load();
           setPhase("idle");
           if (onEnd) onEnd();
-        },
-        { once: true }
-      );
+        };
 
-      try {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) await playPromise;
-        setPhase("playing");
-        if (onAudioStart) onAudioStart();
-      } catch (playError) {
-        console.error("Erro ao reproduzir áudio do Pollinations:", playError);
-        setPhase("idle");
-        throw playError;
-      }
+        try {
+          const playPromise = audio.play();
+          if (playPromise !== undefined) await playPromise;
+          setPhase("playing");
+          if (onAudioStart) onAudioStart();
+        } catch (playError) {
+          console.error("Erro ao reproduzir áudio do Pollinations:", playError);
+          setPhase("idle");
+          throw playError;
+        }
     };
 
     recognition.onerror = () => {
@@ -207,5 +204,5 @@ export default function VoiceAssistant({
     }
   }, [isListening, phase, startListening, stopAll]);
 
-  return null; // Sem UI
+  return <audio ref={audioRef} className="hidden" playsInline />; // Elemento de áudio oculto para reprodução
 }

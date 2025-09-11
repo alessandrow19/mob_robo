@@ -122,17 +122,17 @@ export default function InstructionOverlay({
   const circleCirc = 2 * Math.PI * 54; // raio 54
   const dash = circleCirc * pct;
 
-  return (
-    <div
-      className="pointer-events-none fixed inset-0 flex flex-col items-center justify-end pb-20 z-[20] text-white"
-      aria-live="polite"
-    >
-      {/* Cartão principal */}
+    return (
       <div
-        className="pointer-events-auto relative w-[min(600px,92%)] rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/60 backdrop-blur-md shadow-2xl p-6 overflow-hidden animate-[fadeIn_.6s_ease]"
-        onClick={onClick}
-        style={{ cursor: active ? "pointer" : "default" }}
+        className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center z-[20] text-white"
+        aria-live="polite"
       >
+        {/* Cartão principal */}
+        <div
+          className="pointer-events-auto relative mt-24 w-[min(600px,92%)] rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/60 backdrop-blur-md shadow-2xl p-6 overflow-hidden animate-[fadeIn_.6s_ease]"
+          onClick={onClick}
+          style={{ cursor: active ? "pointer" : "default" }}
+        >
         {/* Glow decorativo */}
         <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(56,189,248,0.35),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.25),transparent_65%)]" />
         {/* Borda animada */}

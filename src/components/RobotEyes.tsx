@@ -77,39 +77,16 @@ export default function RobotEyes({
             <span>.</span>
           </span>
         </div>
-        {/* Botão mais afastado e estilizado */}
-        <button
+        {/* Texto simples para iniciar fala */}
+        <div
           onClick={onStartListening}
-          /* Botão de fallback manual para iniciar fala */
-          className="mt-10 group relative inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-600 via-emerald-600 to-sky-600 text-white text-sm font-medium shadow-[0_4px_18px_-4px_rgba(6,182,212,0.45)] hover:shadow-[0_6px_22px_-4px_rgba(6,182,212,0.6)] transition-all active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
-          style={{ cursor: "pointer" }}
+          className="mt-10 text-cyan-300 text-sm font-medium cursor-pointer select-none"
         >
-          <span className="relative z-10 flex items-center gap-2">
-            {/* Ícone mic simples */}
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="opacity-90"
-            >
-              <rect x="9" y="4" width="6" height="10" rx="3" />
-              <path d="M5 11v1a7 7 0 0 0 14 0v-1" />
-              <path d="M12 21v-3" />
-            </svg>
-            Falar agora
-          </span>
-          {/* Glow */}
-          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/30 via-emerald-400/25 to-sky-400/30 opacity-0 group-hover:opacity-100 blur-md transition" />
-          <span className="absolute inset-[2px] rounded-full bg-slate-900/30 backdrop-blur-sm" />
-        </button>
-      </div>
-    );
-  }
+          Falar agora
+        </div>
+        </div>
+      );
+    }
 
   // Estado: processando (TTS gerando / áudio reproduzindo) -> equalizer minimalista
   if (isProcessing) {
