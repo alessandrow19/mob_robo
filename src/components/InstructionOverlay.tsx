@@ -14,9 +14,10 @@ const SmileIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" className="drop-shadow-sm">
     <circle cx="12" cy="12" r="10" fill="url(#grad-smile)" />
     <defs>
+      {/* Gradiente ajustado para tons de amarelo */}
       <linearGradient id="grad-smile" x1="0" x2="1" y1="0" y2="1">
-        <stop offset="0%" stopColor="#22d3ee" />
-        <stop offset="100%" stopColor="#0ea5e9" />
+        <stop offset="0%" stopColor="#facc15" />
+        <stop offset="100%" stopColor="#eab308" />
       </linearGradient>
     </defs>
     <circle cx="9" cy="10" r="1.4" fill="#0f172a" />
@@ -173,12 +174,6 @@ export default function InstructionOverlay({
                 Janela aberta! Toque agora para perguntar algo sobre o universo.
               </p>
             )}
-            <ul className="mt-1 text-[11px] md:text-xs text-slate-400 flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 font-medium tracking-wide">
-              <li>• Sorriso legitima gesto</li>
-              <li>• Toque destrava o microfone</li>
-              <li>• Respostas só: astronomia</li>
-              <li>• Evite ruídos fortes</li>
-            </ul>
           </div>
           {/* Indicador circular */}
           <div className="relative w-[140px] h-[140px] flex items-center justify-center">
