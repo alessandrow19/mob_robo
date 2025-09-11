@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
 import InstructionOverlay from "@/components/InstructionOverlay";
+import MicStatus from "@/components/MicStatus";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
@@ -54,6 +55,7 @@ export default function Home() {
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
+      <MicStatus />
       {/* Componente de voz: escuta quando isListening=true */}
       <VoiceAssistant
         isListening={isListening}

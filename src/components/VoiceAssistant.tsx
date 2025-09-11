@@ -44,6 +44,25 @@ export default function VoiceAssistant({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const unlockedRef = useRef(false);
+
+  const unlockAudio = useCallback(() => {
+    if (unlockedRef.current || !audioRef.current) return;
+    const audio = audioRef.current;
+    audio.src =
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+    audio.muted = true;
+    audio
+      .play()
+      .then(() => {
+        audio.pause();
+        audio.muted = false;
+        audio.removeAttribute("src");
+        audio.load();
+        unlockedRef.current = true;
+      })
+      .catch(() => {});
+  }, []);
 
   // Função para parar tudo
   const stopAll = useCallback(() => {
@@ -82,6 +101,8 @@ export default function VoiceAssistant({
       alert("Seu navegador não suporta o reconhecimento de voz.");
       return;
     }
+
+    unlockAudio();
 
     const recognition = new SpeechRecognitionClass();
     recognition.lang = "pt-BR";
@@ -204,5 +225,5 @@ export default function VoiceAssistant({
     }
   }, [isListening, phase, startListening, stopAll]);
 
-  return <audio ref={audioRef} className="hidden" playsInline />; // Elemento de áudio oculto para reprodução
+  return <audio ref={audioRef} className="sr-only" playsInline />; // Elemento de áudio oculto para reprodução
 }
