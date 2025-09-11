@@ -35,16 +35,19 @@ export default function VoiceAssistant({
   onEnd,
   onAudioStart,
 }: VoiceAssistantProps) {
-  // Estado para saber se está processando
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Máquina de estados simples
+  // idle -> recording -> tts -> playing -> idle
+  const [phase, setPhase] = useState<"idle" | "recording" | "tts" | "playing">(
+    "idle"
+  );
   // Referências para áudio e reconhecimento
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<number | null>(null);
-  const cancelledRef = useRef(false);
 
   // Função para parar tudo
   const stopAll = useCallback(() => {
+    // Interrompe reconhecimento e áudio e volta para idle
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -68,7 +71,7 @@ export default function VoiceAssistant({
 
   // Função para iniciar reconhecimento de voz
   const startListening = useCallback(() => {
-    if (isProcessing) return;
+    if (phase !== "idle") return; // evita reentrância
 
     const SpeechRecognitionClass =
       (window as SpeechRecognitionWindow).SpeechRecognition ||
@@ -87,14 +90,16 @@ export default function VoiceAssistant({
     if (onStart) onStart();
 
     // Timeout para não travar
+    // Timeout de segurança para não ficar preso em recording
     timeoutRef.current = window.setTimeout(() => {
+      console.warn("[VoiceAssistant] Timeout de gravação atingido");
       stopAll();
     }, 10000);
 
     // Quando reconhecer voz
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
-      if (isProcessing) return;
-      setIsProcessing(true);
+      // Consideramos que estamos em 'recording' ao receber resultado
+      setPhase("tts");
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
@@ -110,8 +115,9 @@ export default function VoiceAssistant({
       const prompt = ` Responda sempre em português do Brasil, nunca use português de Portugal, nem regionalismos de Portugal. Responda apenas perguntas relacionadas à astronomia. Pergunta: ${transcript} ? `;
       // Para áudio anterior
       if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        try {
+          audioRef.current.pause();
+        } catch {}
         audioRef.current = null;
       }
 
@@ -155,9 +161,22 @@ export default function VoiceAssistant({
       audio.src = url;
       audioRef.current = audio;
 
+      // Listener de término natural do áudio
+      audio.addEventListener(
+        "ended",
+        () => {
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+          setPhase("idle");
+          if (onEnd) onEnd();
+        },
+        { once: true }
+      );
+
       try {
         const playPromise = audio.play();
         if (playPromise !== undefined) await playPromise;
+        setPhase("playing");
         if (onAudioStart) onAudioStart();
       } catch (playError) {
         console.error("Erro ao reproduzir áudio do Pollinations:", playError);
@@ -179,10 +198,14 @@ export default function VoiceAssistant({
 
   // Inicia escuta se isListening for true e não estiver processando
   useEffect(() => {
-    if (isListening && !isProcessing) {
+    if (isListening && phase === "idle") {
       startListening();
     }
-  }, [isListening, isProcessing, startListening]);
+    // Se usuário retirou isListening enquanto gravando, parar
+    if (!isListening && (phase === "recording" || phase === "tts")) {
+      stopAll();
+    }
+  }, [isListening, phase, startListening, stopAll]);
 
-  return null; // Componente não renderiza UI diretamente
+  return null; // Sem UI
 }
