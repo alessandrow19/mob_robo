@@ -35,8 +35,15 @@ export default function VoiceAssistant({
   onEnd,
   onAudioStart,
 }: VoiceAssistantProps) {
-  // Estado para saber se está processando
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Estado de fase granular para evitar conflitos e cortes de áudio
+  // idle -> aguardando; recording -> capturando voz; tts -> baixando áudio; playing -> reproduzindo resposta
+  const [phase, setPhase] = useState<"idle" | "recording" | "tts" | "playing">(
+    "idle"
+  );
+  const phaseRef = useRef(phase);
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
   // Referências para áudio e reconhecimento
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -44,6 +51,25 @@ export default function VoiceAssistant({
 
   // Função para parar tudo
   const stopAll = useCallback(() => {
+    // Se estiver reproduzindo, não forçar corte imediato a menos que usuário tenha explicitamente mudado estado externo
+    if (phaseRef.current === "playing") {
+      // Marcar para término suave
+      if (audioRef.current) {
+        audioRef.current.onended = null; // evitamos disparo duplo
+        const a = audioRef.current;
+        a.addEventListener(
+          "ended",
+          () => {
+            if (onEnd) onEnd();
+          },
+          { once: true }
+        );
+        a.volume = 0; // fade instantâneo simples
+        a.pause();
+      }
+      setPhase("idle");
+      return;
+    }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -60,13 +86,13 @@ export default function VoiceAssistant({
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    setIsProcessing(false);
+    setPhase("idle");
     if (onEnd) onEnd();
   }, [onEnd]);
 
   // Função para iniciar reconhecimento de voz
   const startListening = useCallback(() => {
-    if (isProcessing) return;
+    if (phase !== "idle") return; // evita iniciar durante outra fase
 
     const SpeechRecognitionClass =
       (window as SpeechRecognitionWindow).SpeechRecognition ||
@@ -81,22 +107,29 @@ export default function VoiceAssistant({
     recognition.lang = "pt-BR";
     recognition.start();
     recognitionRef.current = recognition;
-    setIsProcessing(true);
+    setPhase("recording");
     if (onStart) onStart();
 
     // Timeout para não travar
     timeoutRef.current = window.setTimeout(() => {
-      stopAll();
-    }, 10000);
+      if (phaseRef.current === "recording") {
+        stopAll();
+      }
+    }, 12000);
 
     // Quando reconhecer voz
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
-      if (isProcessing) return;
-      setIsProcessing(true);
+      // Garante que processamos apenas uma vez
+      if (phaseRef.current !== "recording") return;
+      setPhase("tts");
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
+      // Parar reconhecimento imediatamente para evitar eventos tardios interferindo
+      try {
+        recognition.stop?.();
+      } catch {}
       const transcript = event.results[0][0].transcript;
       console.log("Transcrição:", transcript); // Mostra transcrição no console
 
@@ -143,23 +176,94 @@ export default function VoiceAssistant({
       }
 
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
+      const audio = new Audio();
+      audio.preload = "auto";
+      audio.src = url;
       audioRef.current = audio;
 
+      // Adiciona listeners para debug detalhado e evitar corte
+      audio.addEventListener("loadedmetadata", () => {
+        console.log("Duração do áudio (s):", audio.duration);
+      });
+      // Esperar canplaythrough antes de iniciar para reduzir risco de cortes (buffering)
+      const waitCanPlay = new Promise<void>((resolve, reject) => {
+        const onReady = () => {
+          resolve();
+          cleanup();
+        };
+        const onError = (e: any) => {
+          reject(e);
+          cleanup();
+        };
+        const cleanup = () => {
+          audio.removeEventListener("canplaythrough", onReady);
+          audio.removeEventListener("error", onError);
+        };
+        audio.addEventListener("canplaythrough", onReady, { once: true });
+        audio.addEventListener("error", onError, { once: true });
+        // Fallback: se não disparar em 2.5s, segue mesmo assim
+        setTimeout(() => {
+          if (phaseRef.current === "tts") {
+            console.warn(
+              "canplaythrough não disparou em 2500ms, iniciando mesmo assim"
+            );
+            cleanup();
+            resolve();
+          }
+        }, 2500);
+      });
+      audio.addEventListener("timeupdate", () => {
+        // console.log("Progresso:", audio.currentTime.toFixed(2)); // descomentar se precisar
+      });
+      audio.addEventListener("ended", () => {
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        setPhase("idle");
+        if (onEnd) onEnd();
+      });
+      audio.addEventListener("error", (e) => {
+        console.error("Erro de reprodução de áudio", e);
+        setPhase("idle");
+        if (onEnd) onEnd();
+      });
+      // Auto-resume: se um pause ocorrer antes de 90% da duração e não estivermos em idle, tentar retomar
+      let autoResumeAttempts = 0;
+      audio.addEventListener("pause", () => {
+        if (
+          phaseRef.current === "playing" &&
+          audio.currentTime < audio.duration * 0.9
+        ) {
+          if (autoResumeAttempts < 2) {
+            autoResumeAttempts++;
+            setTimeout(() => {
+              audio.play().catch(() => {});
+            }, 120);
+          }
+        }
+      });
+
+      // Watchdog: garante finalização mesmo se 'ended' não disparar (alguns bugs de Media pipeline)
+      const watchdog = () => {
+        if (!audioRef.current || phaseRef.current !== "playing") return;
+        if (audio.duration && audio.currentTime >= audio.duration - 0.15) {
+          console.warn("Watchdog finalizando áudio silenciado no fim.");
+          audioRef.current?.dispatchEvent(new Event("ended"));
+        } else {
+          setTimeout(watchdog, 500);
+        }
+      };
+
       try {
+        await waitCanPlay;
         const playPromise = audio.play();
         if (playPromise !== undefined) await playPromise;
+        setPhase("playing");
+        setTimeout(watchdog, 1500); // inicia watchdog depois de tocar um pouco
         if (onAudioStart) onAudioStart();
       } catch (playError) {
         console.error("Erro ao reproduzir áudio do Pollinations:", playError);
+        setPhase("idle");
         throw playError;
-      } finally {
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          audioRef.current = null;
-          setIsProcessing(false); // Libera para nova chamada
-          if (onEnd) onEnd();
-        };
       }
     };
 
@@ -168,18 +272,18 @@ export default function VoiceAssistant({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      setIsProcessing(false);
+      setPhase("idle");
       recognitionRef.current = null;
       if (onEnd) onEnd();
     };
-  }, [isProcessing, onStart, onEnd, onAudioStart, stopAll]);
+  }, [phase, onStart, onEnd, onAudioStart, stopAll]);
 
   // Inicia escuta se isListening for true e não estiver processando
   useEffect(() => {
-    if (isListening && !isProcessing) {
+    if (isListening && phase === "idle") {
       startListening();
     }
-  }, [isListening, isProcessing, startListening]);
+  }, [isListening, phase, startListening]);
 
-  return null;
+  return null; // Componente não renderiza UI diretamente
 }
