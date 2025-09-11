@@ -138,7 +138,8 @@ body {
 
 .question-icon {
   color: #00eaff;
-  animation: question-pulse 1.6s ease-in-out infinite, funny-color 1.2s ease-in-out infinite;
+  animation: question-pulse 1.6s ease-in-out infinite,
+    funny-color 1.2s ease-in-out infinite;
   text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
   position: relative;
   z-index: 2;
@@ -149,7 +150,12 @@ body {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 234, 255, 0.4) 0%, rgba(0, 234, 255, 0.05) 70%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 234, 255, 0.4) 0%,
+    rgba(0, 234, 255, 0.05) 70%,
+    transparent 80%
+  );
   animation: question-glow-pulse 2s ease-in-out infinite;
   filter: blur(4px);
   z-index: 1;
@@ -179,4 +185,151 @@ body {
     transform: scale(1.2);
     opacity: 1;
   }
+}
+
+/* ===== Animations: Escuta / Processamento ===== */
+@keyframes ringPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.65;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+@keyframes ringPulseDelay {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.45;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+@keyframes eqBar {
+  0% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0.3);
+  }
+}
+@keyframes thinkingDot {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+.anim-eq-bar {
+  animation: eqBar 1.1s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.anim-eq-bar:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.anim-eq-bar:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.anim-thinking span {
+  animation: thinkingDot 1.4s ease-in-out infinite;
+  display: inline-block;
+}
+.anim-thinking span:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.anim-thinking span:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+/* ================= Overlay Instruction Animations ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes borderRotate {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes floatSlow2 {
+  0%,
+  100% {
+    transform: translateY(2px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes floatMid {
+  0%,
+  100% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-floatSlow {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+.animate-floatSlow2 {
+  animation: floatSlow2 6s ease-in-out infinite;
+}
+.animate-floatMid {
+  animation: floatMid 4.5s ease-in-out infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
 }
