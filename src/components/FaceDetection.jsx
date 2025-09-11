@@ -88,7 +88,7 @@ const FaceDetection = ({ videoElement, onFaceDetected, onSmile, onAngry }) => {
             }
 
             if (onAngry) {
-              const angry = detections[0].expressions?.angry > 0.7;
+              const angry = detections[0].expressions?.angry > 0.9;
               if (angry && !isAngryRef.current) {
                 isAngryRef.current = true;
                 onAngry();

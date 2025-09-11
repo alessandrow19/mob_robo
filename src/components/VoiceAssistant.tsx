@@ -47,11 +47,18 @@ export default function VoiceAssistant({
 
   // Função para parar tudo
   const stopAll = useCallback(() => {
-    // Interrompe reconhecimento e áudio e volta para idle
+    // Não interromper o áudio se já estiver reproduzindo (fase 'playing').
+    // Requisito: o áudio só deve parar quando terminar naturalmente.
+    if (phase === "playing") {
+      // Mantemos reprodução até o evento 'ended'.
+      return;
+    }
+    // Limpa timeout de segurança se existir
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // Aborta reconhecimento de voz (caso ainda ativo)
     try {
       recognitionRef.current?.abort?.();
       recognitionRef.current?.stop?.();
@@ -59,15 +66,10 @@ export default function VoiceAssistant({
       console.error(e);
     }
     recognitionRef.current = null;
-    if (audioRef.current) {
-      try {
-        audioRef.current.pause();
-      } catch {}
-      audioRef.current = null;
-    }
+    // Não pausamos/zeramos audioRef aqui para permitir término natural (caso algo tenha sido disparado prematuramente)
     setPhase("idle");
     if (onEnd) onEnd();
-  }, [onEnd]);
+  }, [phase, onEnd]);
 
   // Função para iniciar reconhecimento de voz
   const startListening = useCallback(() => {
