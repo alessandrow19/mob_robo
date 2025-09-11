@@ -26,6 +26,9 @@ export default function Home() {
   // Estado para controle de escuta e fala
   const [isListening, setIsListening] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string>("");
 
   // ---------------- MODO ASSISTIDO (sorriso abre janela + toque inicia) ----------------
   const [smileExpiresAt, setSmileExpiresAt] = useState<number | null>(null);
@@ -68,6 +71,9 @@ export default function Home() {
           setIsListening(false);
           setIsTalking(false);
         }}
+        onTranscript={(text) => setTranscript(text)}
+        onAudioElement={(el) => setAudioEl(el)}
+        onAudioUrl={(url) => setAudioUrl(url)}
       />
       <div className="m-auto flex flex-col items-center">
         <div
@@ -109,6 +115,17 @@ export default function Home() {
             </div>
           )}
         </div>
+        {transcript && (
+          <p className="mt-4 text-sm text-white text-center">{transcript}</p>
+        )}
+        {audioUrl && (
+          <button
+            className="mt-2 rounded bg-emerald-600 px-4 py-2 text-white"
+            onClick={() => audioEl?.play()}
+          >
+            Reproduzir áudio
+          </button>
+        )}
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
         <div className="fixed bottom-3 left-3">

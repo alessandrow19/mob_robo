@@ -9,6 +9,9 @@ type VoiceAssistantProps = {
   onStart?: () => void; // Callback ao iniciar
   onEnd?: () => void; // Callback ao terminar
   onAudioStart?: () => void; // Callback ao iniciar áudio
+  onTranscript?: (text: string) => void; // Retorna texto reconhecido
+  onAudioElement?: (el: HTMLAudioElement) => void; // Expor elemento de áudio
+  onAudioUrl?: (url: string) => void; // Retorna URL do áudio gerado
 };
 
 // Tipos para reconhecimento de voz
@@ -34,6 +37,9 @@ export default function VoiceAssistant({
   onStart,
   onEnd,
   onAudioStart,
+  onTranscript,
+  onAudioElement,
+  onAudioUrl,
 }: VoiceAssistantProps) {
   // Máquina de estados simples
   // idle -> recording -> tts -> playing -> idle
@@ -45,6 +51,13 @@ export default function VoiceAssistant({
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const unlockedRef = useRef(false);
+
+  // Expor elemento de áudio ao componente pai
+  useEffect(() => {
+    if (onAudioElement && audioRef.current) {
+      onAudioElement(audioRef.current);
+    }
+  }, [onAudioElement]);
 
   const unlockAudio = useCallback(() => {
     if (unlockedRef.current || !audioRef.current) return;
@@ -85,6 +98,7 @@ export default function VoiceAssistant({
       audioRef.current.removeAttribute("src");
       audioRef.current.load();
     }
+    if (onAudioUrl) onAudioUrl("");
     setPhase("idle");
     if (onEnd) onEnd();
   }, [onEnd]);
@@ -132,6 +146,7 @@ export default function VoiceAssistant({
       } catch {}
       const transcript = event.results[0][0].transcript;
       console.log("Transcrição:", transcript); // Mostra transcrição no console
+      if (onTranscript) onTranscript(transcript);
 
       // Prompt para TTS Pollinations
       const prompt = ` Responda sempre em português do Brasil, nunca use português de Portugal, nem regionalismos de Portugal. Responda apenas perguntas relacionadas à astronomia. Pergunta: ${transcript} ? `;
@@ -143,6 +158,7 @@ export default function VoiceAssistant({
           audioRef.current.removeAttribute("src");
           audioRef.current.load();
         }
+        if (onAudioUrl) onAudioUrl("");
 
       // Busca áudio diretamente do Pollinations TTS
       let audioResponse;
@@ -182,11 +198,10 @@ export default function VoiceAssistant({
         const audio = audioRef.current!;
         audio.preload = "auto";
         audio.src = url;
+        if (onAudioUrl) onAudioUrl(url);
         audio.setAttribute("playsinline", "true");
         audio.onended = () => {
           URL.revokeObjectURL(url);
-          audio.removeAttribute("src");
-          audio.load();
           setPhase("idle");
           if (onEnd) onEnd();
         };
