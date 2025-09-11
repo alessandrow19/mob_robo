@@ -35,15 +35,8 @@ export default function VoiceAssistant({
   onEnd,
   onAudioStart,
 }: VoiceAssistantProps) {
-  // Estado de fase granular para evitar conflitos e cortes de áudio
-  // idle -> aguardando; recording -> capturando voz; tts -> baixando áudio; playing -> reproduzindo resposta
-  const [phase, setPhase] = useState<"idle" | "recording" | "tts" | "playing">(
-    "idle"
-  );
-  const phaseRef = useRef(phase);
-  useEffect(() => {
-    phaseRef.current = phase;
-  }, [phase]);
+  // Estado para saber se está processando
+  const [isProcessing, setIsProcessing] = useState(false);
   // Referências para áudio e reconhecimento
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -52,31 +45,6 @@ export default function VoiceAssistant({
 
   // Função para parar tudo
   const stopAll = useCallback(() => {
-    console.debug("[VoiceAssistant] stopAll chamado. phase=", phaseRef.current);
-    cancelledRef.current = true;
-    // Se estiver reproduzindo, não forçar corte imediato a menos que usuário tenha explicitamente mudado estado externo
-    if (phaseRef.current === "playing") {
-      // Marcar para término suave
-      if (audioRef.current) {
-        audioRef.current.onended = null; // evita duplo
-        const a = audioRef.current;
-        // Fade-out simples gradual
-        const fade = () => {
-          if (!a) return;
-          if (a.volume > 0.1) {
-            a.volume = Math.max(0, a.volume - 0.1);
-            requestAnimationFrame(fade);
-          } else {
-            a.pause();
-            a.currentTime = a.duration; // força ended natural se possível
-            if (onEnd) onEnd();
-          }
-        };
-        fade();
-      }
-      setPhase("idle");
-      return;
-    }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -100,9 +68,7 @@ export default function VoiceAssistant({
 
   // Função para iniciar reconhecimento de voz
   const startListening = useCallback(() => {
-    if (phase !== "idle") return; // evita iniciar durante outra fase
-    cancelledRef.current = false;
-    console.debug("[VoiceAssistant] startListening");
+    if (isProcessing) return;
 
     const SpeechRecognitionClass =
       (window as SpeechRecognitionWindow).SpeechRecognition ||
@@ -122,18 +88,13 @@ export default function VoiceAssistant({
 
     // Timeout para não travar
     timeoutRef.current = window.setTimeout(() => {
-      if (phaseRef.current === "recording") {
-        console.warn("[VoiceAssistant] Timeout de gravação atingido");
-        stopAll();
-      }
-    }, 12000);
+      stopAll();
+    }, 10000);
 
     // Quando reconhecer voz
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
-      // Garante que processamos apenas uma vez
-      if (phaseRef.current !== "recording") return;
-      console.debug("[VoiceAssistant] onresult transição recording -> tts");
-      setPhase("tts");
+      if (isProcessing) return;
+      setIsProcessing(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
@@ -194,80 +155,9 @@ export default function VoiceAssistant({
       audio.src = url;
       audioRef.current = audio;
 
-      // Adiciona listeners para debug detalhado e evitar corte
-      audio.addEventListener("loadedmetadata", () => {
-        console.debug(
-          "[VoiceAssistant] loadedmetadata duration=",
-          audio.duration
-        );
-      });
-      // Esperar canplaythrough antes de iniciar para reduzir risco de cortes (buffering)
-      const waitCanPlay = new Promise<void>((resolve, reject) => {
-        const onReady = () => {
-          resolve();
-          cleanup();
-        };
-        const onError = (e: any) => {
-          reject(e);
-          cleanup();
-        };
-        const cleanup = () => {
-          audio.removeEventListener("canplaythrough", onReady);
-          audio.removeEventListener("error", onError);
-        };
-        audio.addEventListener("canplaythrough", onReady, { once: true });
-        audio.addEventListener("error", onError, { once: true });
-        // Fallback: se não disparar em 2.5s, segue mesmo assim
-        setTimeout(() => {
-          if (phaseRef.current === "tts") {
-            console.warn("[VoiceAssistant] canplaythrough timeout fallback");
-            cleanup();
-            resolve();
-          }
-        }, 2500);
-      });
-      audio.addEventListener("timeupdate", () => {
-        // console.log("Progresso:", audio.currentTime.toFixed(2)); // descomentar se precisar
-      });
-      audio.addEventListener("ended", () => {
-        console.debug("[VoiceAssistant] ended fired");
-        URL.revokeObjectURL(url);
-        audioRef.current = null;
-        setPhase("idle");
-        if (onEnd) onEnd();
-      });
-      audio.addEventListener("error", (e) => {
-        console.error("[VoiceAssistant] audio error", e);
-        setPhase("idle");
-        if (onEnd) onEnd();
-      });
-      // Auto-resume: se um pause ocorrer antes de 90% da duração e não estivermos em idle, tentar retomar
-      let autoResumeAttempts = 0;
-      audio.addEventListener("pause", () => {
-        if (cancelledRef.current) return; // usuário cancelou
-        if (
-          phaseRef.current === "playing" &&
-          audio.duration &&
-          audio.currentTime < audio.duration * 0.92
-        ) {
-          if (autoResumeAttempts < 2) {
-            autoResumeAttempts++;
-            console.debug(
-              "[VoiceAssistant] pausa inesperada, tentando retomar"
-            );
-            setTimeout(() => {
-              audio.play().catch(() => {});
-            }, 120);
-          }
-        }
-      });
-
       try {
-        await waitCanPlay;
         const playPromise = audio.play();
         if (playPromise !== undefined) await playPromise;
-        setPhase("playing");
-        console.debug("[VoiceAssistant] começou a reproduzir");
         if (onAudioStart) onAudioStart();
       } catch (playError) {
         console.error("Erro ao reproduzir áudio do Pollinations:", playError);
@@ -289,8 +179,10 @@ export default function VoiceAssistant({
 
   // Inicia escuta se isListening for true e não estiver processando
   useEffect(() => {
-    if (isListening && phase === "idle") startListening();
-  }, [isListening, phase, startListening]);
+    if (isListening && !isProcessing) {
+      startListening();
+    }
+  }, [isListening, isProcessing, startListening]);
 
   return null; // Componente não renderiza UI diretamente
 }
