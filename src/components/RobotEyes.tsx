@@ -6,7 +6,6 @@ import {
   calculateEyePosition,
   determineExpression,
   getExpressionStyles,
-  Expression,
 } from "./robotEyesUtils";
 
 // Props do componente: posição do rosto, estados de escuta e processamento

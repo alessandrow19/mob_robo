@@ -140,11 +140,13 @@ const VoiceAssistant = forwardRef<VoiceAssistantHandle, VoiceAssistantProps>(
 
       try {
         recognition.start(); // IMPORTANTE: deve ocorrer em gesto direto no mobile
-      } catch (startErr: any) {
+      } catch (startErr: unknown) {
         console.error("Erro ao iniciar reconhecimento:", startErr);
-        setLastError(
-          startErr?.message || "Não foi possível iniciar o microfone."
-        );
+        const msg =
+          startErr instanceof Error
+            ? startErr.message
+            : "Não foi possível iniciar o microfone.";
+        setLastError(msg);
         return;
       }
 
@@ -312,5 +314,8 @@ const VoiceAssistant = forwardRef<VoiceAssistantHandle, VoiceAssistantProps>(
     return null;
   }
 );
+
+// Define displayName para evitar warning do ESLint (react/display-name)
+VoiceAssistant.displayName = "VoiceAssistant";
 
 export default VoiceAssistant;

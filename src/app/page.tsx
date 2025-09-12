@@ -7,10 +7,6 @@ import { useState, useEffect, useCallback } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
 import InstructionOverlay from "@/components/InstructionOverlay";
-import {
-  handleSmileInteraction,
-  handleAngryInteraction,
-} from "@/utils/interactionHandlers";
 
 export default function Home() {
   // Estado do vídeo e rosto
