@@ -100,74 +100,56 @@ export default function VoiceAssistant({
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
-        const textResponse = await fetch(
-          `/api/pollinate?q=${encodeURIComponent(astronomyPrompt)}`,
-          {
-            cache: "no-store",
-            headers: {
-              "Accept-Language": "pt-BR",
-              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
-            },
-          }
-        );
-        if (!textResponse.ok) throw new Error("Falha ao obter texto");
-        const answer = await textResponse.text();
+        // Para o áudio anterior antes de iniciar novo
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current = null;
+        }
+
+        // 🎯 CHAMADA DIRETA - elimina o route.ts intermediário
+        const audioResponse = await fetch(getVoiceUrl(astronomyPrompt), {
+          headers: {
+            Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
+            Authorization: "Bearer sc6EZeTBRIf51QHl",
+          },
+          cache: "no-store",
+          mode: "cors",
+        });
+
+        if (!audioResponse.ok) {
+          console.error(
+            "Falha ao obter áudio do Pollinations",
+            audioResponse.status,
+            audioResponse.statusText
+          );
+          throw new Error("Falha ao obter áudio");
+        }
+
+        const blob = await audioResponse.blob();
+        if (!blob || blob.size === 0) {
+          console.error("Blob de áudio vazio");
+          throw new Error("Áudio vazio");
+        }
+
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
 
         try {
-          // Para o áudio anterior antes de iniciar novo
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
+          const playPromise = audio.play();
+          if (playPromise !== undefined) await playPromise;
+          if (onAudioStart) onAudioStart();
+        } catch (playError) {
+          console.error("Erro ao reproduzir áudio do Pollinations:", playError);
+          throw playError;
+        } finally {
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
             audioRef.current = null;
-          }
-          // ❌ Sem Authorization aqui — evita CORS preflight
-          const audioResponse = await fetch(getVoiceUrl(answer), {
-            headers: {
-              Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
-            },
-            cache: "no-store",
-            mode: "cors",
-          });
-
-          if (!audioResponse.ok) {
-            console.error(
-              "Falha ao obter áudio do Pollinations",
-              audioResponse.status,
-              audioResponse.statusText
-            );
-            throw new Error("Falha ao obter áudio");
-          }
-
-          const blob = await audioResponse.blob();
-          if (!blob || blob.size === 0) {
-            console.error("Blob de áudio vazio");
-            throw new Error("Áudio vazio");
-          }
-
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audioRef.current = audio;
-
-          try {
-            const playPromise = audio.play();
-            if (playPromise !== undefined) await playPromise;
-            if (onAudioStart) onAudioStart();
-          } catch (playError) {
-            console.error(
-              "Erro ao reproduzir áudio do Pollinations:",
-              playError
-            );
-            throw playError;
-          } finally {
-            audio.onended = () => {
-              URL.revokeObjectURL(url);
-              audioRef.current = null;
-              setIsProcessing(false); // Libera para nova chamada
-              if (onEnd) onEnd();
-            };
-          }
-        } catch (audioError) {
-          console.error("Erro no TTS:", audioError);
+            setIsProcessing(false); // Libera para nova chamada
+            if (onEnd) onEnd();
+          };
         }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);

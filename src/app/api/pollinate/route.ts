@@ -8,7 +8,9 @@ export async function GET(req: NextRequest) {
   }
   try {
     const resp = await fetch(
-      `https://text.pollinations.ai/${encodeURIComponent(query)}`,
+      `https://text.pollinations.ai/${encodeURIComponent(
+        query
+      )}?model=openai-audio&voice=onyx&format=mp3`,
       { next: { revalidate: 0 } }
     );
     if (!resp.ok) {
