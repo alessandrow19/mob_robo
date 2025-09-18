@@ -6,10 +6,16 @@ import RobotEyes from "@/components/RobotEyes";
 import { useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
+import dynamic from "next/dynamic";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
 } from "@/utils/interactionHandlers";
+
+// Importa Dictaphone apenas no cliente para evitar hidratação
+const Dictaphone = dynamic(() => import("@/components/Dictaphone"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -31,7 +37,7 @@ export default function Home() {
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
-      <VoiceAssistant
+      {/* <VoiceAssistant
         trigger={listenTrigger}
         stopTrigger={stopTrigger}
         onStart={() => setIsListening(true)}
@@ -43,7 +49,10 @@ export default function Home() {
           setIsListening(false);
           setIsTalking(false);
         }}
-      />
+      /> */}
+
+      <Dictaphone />
+
       <div className="m-auto flex flex-col items-center">
         <RobotEyes
           facePosition={facePosition}
