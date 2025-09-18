@@ -97,7 +97,10 @@ export default function RobotEyes({
         </div>
       </div>
 
-      <div className="boca animate-pulse">
+      <div
+        className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
+        aria-hidden="true"
+      >
         <Image src="/face/boca.png" alt="Boca" width={80} height={80} />
       </div>
     </div>
