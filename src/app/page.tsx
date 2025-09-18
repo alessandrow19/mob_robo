@@ -6,16 +6,10 @@ import RobotEyes from "@/components/RobotEyes";
 import { useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
-import dynamic from "next/dynamic";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
 } from "@/utils/interactionHandlers";
-
-// Importa Dictaphone apenas no cliente para evitar hidratação
-const Dictaphone = dynamic(() => import("@/components/Dictaphone"), {
-  ssr: false,
-});
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -30,17 +24,28 @@ export default function Home() {
   const [isListening, setIsListening] = useState(false);
   const [stopTrigger, setStopTrigger] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
+  const [showVoiceButton, setShowVoiceButton] = useState(false);
 
-  const handleSmile = () =>
-    handleSmileInteraction(isListening, setIsListening, setListenTrigger);
+  const handleSmile = () => {
+    if (!isListening && !isTalking) {
+      setShowVoiceButton(true);
+    }
+  };
 
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
+  const startVoiceFlow = () => {
+    setShowVoiceButton(false);
+    handleSmileInteraction(isListening, setIsListening, setListenTrigger);
+  };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
-      {/* <VoiceAssistant
+      <VoiceAssistant
         trigger={listenTrigger}
         stopTrigger={stopTrigger}
-        onStart={() => setIsListening(true)}
+        onStart={() => {
+          setIsListening(true);
+          setShowVoiceButton(false);
+        }}
         onAudioStart={() => {
           setIsListening(false);
           setIsTalking(true);
@@ -48,10 +53,9 @@ export default function Home() {
         onEnd={() => {
           setIsListening(false);
           setIsTalking(false);
+          setShowVoiceButton(false);
         }}
-      /> */}
-
-      <Dictaphone />
+      />
 
       <div className="m-auto flex flex-col items-center">
         <RobotEyes
@@ -90,6 +94,16 @@ export default function Home() {
           )}
         </div>
       </div>
+      {showVoiceButton && !isListening && !isTalking && (
+        <button
+          type="button"
+          onClick={startVoiceFlow}
+          className="voice-button"
+        >
+          <span className="voice-button__glow" />
+          <span className="voice-button__label">Falar com o Robo</span>
+        </button>
+      )}
       {/* Adicione o componente DirectionTracker */}
       <DirectionTracker direction={currentDirection} />
     </div>
