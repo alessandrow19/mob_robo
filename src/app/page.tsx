@@ -7,6 +7,7 @@ import { useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
 import dynamic from "next/dynamic";
+import UniverseBackground from "@/components/UniverseBackground";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
@@ -36,7 +37,9 @@ export default function Home() {
 
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   return (
-    <div className="relative grid min-h-dvh w-dvw place-items-center">
+    <div className="space-stage">
+      <UniverseBackground />
+      <div className="space-haze" />
       {/* <VoiceAssistant
         trigger={listenTrigger}
         stopTrigger={stopTrigger}
@@ -53,12 +56,28 @@ export default function Home() {
 
       <Dictaphone />
 
-      <div className="m-auto flex flex-col items-center">
+      <div className="astronaut-floating orbit-left">
+        <span className="orbit-core" />
+      </div>
+      <div className="astronaut-floating orbit-right">
+        <span className="orbit-core" />
+      </div>
+      <div className="astronaut-floating satellite" />
+      <div className="astronaut-floating comet" />
+
+      <div className="astronaut-wrapper">
+        <div className="astronaut-badge badge-left">MOB-01</div>
+        <div className="astronaut-badge badge-right">Explorador</div>
         <RobotEyes
           facePosition={facePosition}
           isListening={isListening}
           isProcessing={isTalking}
         />
+        <div className="astronaut-info">
+          <span className="info-chip">Orbitando confiança</span>
+          <span className="info-chip">Escuta espacial ativa</span>
+          <span className="info-chip">Modo gravidade zero</span>
+        </div>
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
         <div className="fixed bottom-3 left-3">
