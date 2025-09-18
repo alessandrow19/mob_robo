@@ -37,34 +37,50 @@ export default function VoiceAssistant({
   onEnd,
   onAudioStart,
 }: VoiceAssistantProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [status, setStatus] = useState<"idle" | "listening" | "responding">(
+    "idle"
+  );
+  const statusRef = useRef<"idle" | "listening" | "responding">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<number | null>(null);
 
-  const stopProcessing = useCallback(() => {
+  const updateStatus = useCallback((nextStatus: typeof status) => {
+    statusRef.current = nextStatus;
+    setStatus(nextStatus);
+  }, []);
+
+  const cleanupRecognition = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+
     try {
       recognitionRef.current?.abort?.();
       recognitionRef.current?.stop?.();
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
+
     recognitionRef.current = null;
+  }, []);
+
+  const resetToIdle = useCallback(() => {
+    cleanupRecognition();
+
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    setIsProcessing(false);
+
+    updateStatus("idle");
     if (onEnd) onEnd();
-  }, [onEnd]);
+  }, [cleanupRecognition, onEnd, updateStatus]);
 
   const startListening = useCallback(() => {
-    if (isProcessing) return;
+    if (statusRef.current !== "idle") return;
 
     const SpeechRecognitionClass =
       (window as SpeechRecognitionWindow).SpeechRecognition ||
@@ -79,35 +95,40 @@ export default function VoiceAssistant({
     recognition.lang = "pt-BR";
     recognition.start();
     recognitionRef.current = recognition;
-    setIsProcessing(true);
+    updateStatus("listening");
     if (onStart) onStart();
 
     timeoutRef.current = window.setTimeout(() => {
-      stopProcessing();
+      resetToIdle();
     }, 10000);
 
     recognition.onresult = async (event: CustomSpeechRecognitionEvent) => {
-      // Bloqueia múltiplas chamadas se já estiver processando
-      if (isProcessing) return;
-      setIsProcessing(true);
+      if (statusRef.current !== "listening") return;
+
+      const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? "";
+
+      cleanupRecognition();
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      const transcript = event.results[0][0].transcript;
 
-      // improved prompt with clearer instructions in Brazilian Portuguese
+      if (!transcript) {
+        resetToIdle();
+        return;
+      }
+
+      updateStatus("responding");
+
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
-        // Para o áudio anterior antes de iniciar novo
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
           audioRef.current = null;
         }
 
-        // 🎯 CHAMADA DIRETA - elimina o route.ts intermediário
         const audioResponse = await fetch(getVoiceUrl(astronomyPrompt), {
           headers: {
             Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
@@ -136,6 +157,12 @@ export default function VoiceAssistant({
         const audio = new Audio(url);
         audioRef.current = audio;
 
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+          resetToIdle();
+        };
+
         try {
           const playPromise = audio.play();
           if (playPromise !== undefined) await playPromise;
@@ -143,46 +170,29 @@ export default function VoiceAssistant({
         } catch (playError) {
           console.error("Erro ao reproduzir áudio do Pollinations:", playError);
           throw playError;
-        } finally {
-          audio.onended = () => {
-            URL.revokeObjectURL(url);
-            audioRef.current = null;
-            setIsProcessing(false); // Libera para nova chamada
-            if (onEnd) onEnd();
-          };
         }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
-        setIsProcessing(false);
-        recognitionRef.current = null;
-        audioRef.current = null;
-        if (onEnd) onEnd();
+        resetToIdle();
       }
     };
 
     recognition.onerror = () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      setIsProcessing(false);
-      recognitionRef.current = null;
-      if (onEnd) onEnd();
+      resetToIdle();
     };
-  }, [isProcessing, onStart, onEnd, onAudioStart, stopProcessing]);
+  }, [cleanupRecognition, onAudioStart, onStart, resetToIdle, updateStatus]);
 
-  // Só ativa se não estiver processando e trigger mudou
   useEffect(() => {
-    if (trigger > 0 && !isProcessing) {
+    if (trigger > 0) {
       startListening();
     }
-  }, [trigger, isProcessing, startListening]);
+  }, [trigger, startListening]);
 
   useEffect(() => {
     if (stopTrigger > 0) {
-      stopProcessing();
+      resetToIdle();
     }
-  }, [stopTrigger, stopProcessing]);
+  }, [stopTrigger, resetToIdle]);
 
   return null;
 }
