@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getVoiceUrl } from "../utils/pollinations.js";
+import { playAudioResponse } from "../utils/audioPlayback";
 
 type VoiceAssistantProps = {
   trigger: number;
@@ -163,19 +164,21 @@ export default function VoiceAssistant({
         const audio = new Audio(url);
         audioRef.current = audio;
 
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          audioRef.current = null;
-          resetToIdle();
-        };
-
         try {
-          if (onResponsePendingEnd) onResponsePendingEnd();
-          const playPromise = audio.play();
-          if (playPromise !== undefined) await playPromise;
-          if (onAudioStart) onAudioStart();
+          await playAudioResponse({
+            audio,
+            url,
+            onAudioStart,
+            onResponsePendingEnd,
+            onPlaybackFinished: () => {
+              // Garantimos que o reset só aconteça após o término natural do áudio.
+              audioRef.current = null;
+              resetToIdle();
+            },
+          });
         } catch (playError) {
           console.error("Erro ao reproduzir áudio do Pollinations:", playError);
+          audioRef.current = null;
           throw playError;
         }
       } catch (error) {
@@ -205,7 +208,8 @@ export default function VoiceAssistant({
   }, [trigger, startListening]);
 
   useEffect(() => {
-    if (stopTrigger > 0) {
+    if (stopTrigger > 0 && statusRef.current === "listening") {
+      // Só interrompemos a escuta ativa; se o robô estiver respondendo, deixamos o áudio terminar.
       resetToIdle();
     }
   }, [stopTrigger, resetToIdle]);

@@ -75,10 +75,19 @@ export default function RobotEyes({
         <div className="relative flex items-center justify-center">
           <div className="question-glow"></div>
           <div className="question-icon text-[120px]">?</div>
-          {isAwaitingResponse && (
-            <div className="loading-spinner" aria-label="Processando áudio" />
-          )}
         </div>
+        {isAwaitingResponse && (
+          <div className="processing-indicator" aria-live="polite">
+            {/* Mantemos o texto apenas para leitores de tela */}
+            <span className="sr-only">Processando áudio</span>
+            <div className="loading-dots" aria-hidden="true">
+              {/* Três pontinhos para indicar o processamento sem cobrir o ponto de interrogação */}
+              <span className="loading-dot" />
+              <span className="loading-dot" />
+              <span className="loading-dot" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
