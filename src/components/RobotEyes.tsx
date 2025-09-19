@@ -26,6 +26,7 @@ export default function RobotEyes({
   isProcessing = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
+  const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -35,6 +36,19 @@ export default function RobotEyes({
 
     return () => clearInterval(blinkInterval);
   }, []);
+
+  useEffect(() => {
+    if (!isProcessing) {
+      setMouthFrame(0);
+      return;
+    }
+
+    const mouthInterval = setInterval(() => {
+      setMouthFrame((prev) => (prev === 0 ? 1 : 0));
+    }, 180);
+
+    return () => clearInterval(mouthInterval);
+  }, [isProcessing]);
 
   const expression: Expression = determineExpression(
     facePosition.x,
@@ -101,7 +115,32 @@ export default function RobotEyes({
         className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
         aria-hidden="true"
       >
-        <Image src="/face/boca.png" alt="Boca" width={80} height={80} />
+        <div
+          className={`mouth-frame ${
+            !isProcessing || mouthFrame === 0 ? "mouth-visible" : ""
+          }`}
+        >
+          <Image
+            src="/face/boca.png"
+            alt="Boca"
+            width={80}
+            height={80}
+            className="mouth-sprite"
+          />
+        </div>
+        <div
+          className={`mouth-frame ${
+            isProcessing && mouthFrame === 1 ? "mouth-visible" : ""
+          }`}
+        >
+          <Image
+            src="/face/boca2.png"
+            alt="Boca aberta"
+            width={80}
+            height={80}
+            className="mouth-sprite"
+          />
+        </div>
       </div>
     </div>
   );
