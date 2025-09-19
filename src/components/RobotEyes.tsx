@@ -131,31 +131,22 @@ export default function RobotEyes({
         className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
         aria-hidden="true"
       >
+        {/* Frames alternam entre boca fechada e aberta usando formas geométricas simples */}
         <div
           className={`mouth-frame ${
             !isProcessing || mouthFrame === 0 ? "mouth-visible" : ""
           }`}
         >
-          <Image
-            src="/face/boca.png"
-            alt="Boca"
-            width={80}
-            height={80}
-            className="mouth-sprite"
-          />
+          <div className="mouth-shape mouth-closed" />
         </div>
         <div
           className={`mouth-frame ${
             isProcessing && mouthFrame === 1 ? "mouth-visible" : ""
           }`}
         >
-          <Image
-            src="/face/boca2.png"
-            alt="Boca aberta"
-            width={80}
-            height={80}
-            className="mouth-sprite"
-          />
+          <div className="mouth-shape mouth-open">
+            <div className="mouth-open-inner" />
+          </div>
         </div>
       </div>
     </div>
