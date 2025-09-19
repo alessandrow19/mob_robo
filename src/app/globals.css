@@ -185,33 +185,61 @@ body {
 }
 
 .mouth-shape {
-  width: 82px;
-  border-radius: 9999px;
+  width: 86px;
+  border-radius: 90% 90% 60% 60% / 130% 130% 70% 70%;
   transition: transform 0.18s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Boca redesenhada com a paleta azul dos olhos para reforçar o sorriso */
 .mouth-closed {
-  height: 14px;
-  background: linear-gradient(180deg, #ff6a9f 0%, #ff3f7d 45%, #b1003a 100%);
-  box-shadow: 0 2px 6px rgba(255, 90, 144, 0.4);
+  height: 18px;
+  background: linear-gradient(180deg, #66f6ff 0%, #00d2ff 48%, #0065ff 100%);
+  box-shadow: 0 3px 8px rgba(0, 195, 255, 0.45);
+}
+
+.mouth-closed::after {
+  content: "";
+  position: absolute;
+  inset: 3px 10px 6px;
+  border-radius: 9999px;
+  border-top: 3px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 3px solid transparent;
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .mouth-open {
-  height: 48px;
-  padding: 6px 10px;
-  background: linear-gradient(180deg, #ff6a9f 0%, #ff4d86 40%, #7a0038 100%);
-  box-shadow: 0 4px 12px rgba(255, 90, 144, 0.45);
+  height: 50px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #66f6ff 0%, #00c8ff 45%, #004fdf 100%);
+  box-shadow: 0 6px 14px rgba(0, 170, 255, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.mouth-open::after {
+  content: "";
+  position: absolute;
+  inset: 6px 12px;
+  border-radius: 9999px;
+  border-top: 4px solid rgba(255, 255, 255, 0.55);
+  border-bottom: 4px solid transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 200, 255, 0.35));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .mouth-open-inner {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background: radial-gradient(circle at 50% 30%, #ff97b8 0%, #c30446 45%, #25000f 100%);
-  border: 3px solid rgba(255, 204, 220, 0.65);
+  background: radial-gradient(circle at 50% 35%, #0df8ff 0%, #007ce6 55%, #001a33 100%);
+  border: 3px solid rgba(174, 236, 255, 0.7);
+  position: relative;
+  z-index: 0;
 }
 
 @keyframes funny-color {
