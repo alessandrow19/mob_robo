@@ -22,7 +22,7 @@ test('renders question mark while listening', () => {
   assert.ok(html.includes('?'), 'question mark should be visible');
 });
 
-test('renders loading spinner while awaiting response', () => {
+test('renders loading dots below question mark while awaiting response', () => {
   const html = ReactDOMServer.renderToString(
     React.createElement(RobotEyes, {
       facePosition: facePos,
@@ -31,10 +31,12 @@ test('renders loading spinner while awaiting response', () => {
     })
   );
   assert.ok(html.includes('?'), 'question mark should be visible while awaiting');
-  assert.ok(
-    html.includes('loading-spinner'),
-    'loading spinner should be rendered while awaiting'
-  );
+  const dots = html.match(/class=\"loading-dot\"/g) || [];
+  assert.strictEqual(dots.length, 3, 'should render exactly three loading dots');
+
+  const questionIndex = html.indexOf('question-icon');
+  const indicatorIndex = html.indexOf('processing-indicator');
+  assert.ok(indicatorIndex > questionIndex, 'loading dots should appear below the question mark');
 });
 
 test('renders face after finishing response', () => {
@@ -48,4 +50,21 @@ test('renders face after finishing response', () => {
   );
   assert.ok(html.includes('boca.png'), 'mouth image should be rendered');
   assert.ok(!html.includes('?'), 'question mark should be hidden after response');
+});
+
+test('does not render question mark while processing audio', () => {
+  const html = ReactDOMServer.renderToString(
+    React.createElement(RobotEyes, {
+      facePosition: facePos,
+      isListening: true,
+      isAwaitingResponse: true,
+      isProcessing: true,
+    })
+  );
+
+  assert.ok(!html.includes('question-icon'), 'question mark should be hidden during playback');
+  assert.ok(
+    html.includes('mouth-sprite'),
+    'robot mouth should remain visible while processing'
+  );
 });
