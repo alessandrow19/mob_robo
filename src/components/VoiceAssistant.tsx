@@ -49,6 +49,8 @@ export default function VoiceAssistant({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const lastTriggerRef = useRef<number>(0);
+  const lastStopTriggerRef = useRef<number>(0);
 
   const updateStatus = useCallback((nextStatus: typeof status) => {
     statusRef.current = nextStatus;
@@ -202,15 +204,21 @@ export default function VoiceAssistant({
   ]);
 
   useEffect(() => {
-    if (trigger > 0) {
+    if (trigger > 0 && trigger !== lastTriggerRef.current) {
+      lastTriggerRef.current = trigger;
+      // Só reagimos a novos gatilhos, evitando reinícios desnecessários da escuta após o término do áudio.
       startListening();
     }
   }, [trigger, startListening]);
 
   useEffect(() => {
-    if (stopTrigger > 0 && statusRef.current === "listening") {
-      // Só interrompemos a escuta ativa; se o robô estiver respondendo, deixamos o áudio terminar.
-      resetToIdle();
+    if (stopTrigger > 0 && stopTrigger !== lastStopTriggerRef.current) {
+      lastStopTriggerRef.current = stopTrigger;
+
+      if (statusRef.current === "listening") {
+        // Só interrompemos a escuta ativa; se o robô estiver respondendo, deixamos o áudio terminar.
+        resetToIdle();
+      }
     }
   }, [stopTrigger, resetToIdle]);
 
