@@ -18,12 +18,14 @@ type RobotEyesProps = {
   };
   isListening?: boolean;
   isProcessing?: boolean; // Nova prop para indicar processamento de áudio
+  isAwaitingResponse?: boolean;
 };
 
 export default function RobotEyes({
   facePosition,
   isListening = false,
   isProcessing = false,
+  isAwaitingResponse = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
   const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
@@ -64,13 +66,18 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  // Se está ouvindo e não está processando áudio, mostra interrogação
-  if (isListening && !isProcessing) {
+  const shouldShowQuestion = (isListening || isAwaitingResponse) && !isProcessing;
+
+  // Se está ouvindo ou aguardando resposta e não está processando áudio, mostra interrogação
+  if (shouldShowQuestion) {
     return (
       <div className="flex flex-col items-center justify-center gap-8 helmet">
         <div className="relative flex items-center justify-center">
           <div className="question-glow"></div>
           <div className="question-icon text-[120px]">?</div>
+          {isAwaitingResponse && (
+            <div className="loading-spinner" aria-label="Processando áudio" />
+          )}
         </div>
       </div>
     );

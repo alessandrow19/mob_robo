@@ -22,10 +22,30 @@ test('renders question mark while listening', () => {
   assert.ok(html.includes('?'), 'question mark should be visible');
 });
 
-test('renders face when not listening', () => {
+test('renders loading spinner while awaiting response', () => {
   const html = ReactDOMServer.renderToString(
-    React.createElement(RobotEyes, { facePosition: facePos, isListening: false })
+    React.createElement(RobotEyes, {
+      facePosition: facePos,
+      isAwaitingResponse: true,
+      isProcessing: false,
+    })
+  );
+  assert.ok(html.includes('?'), 'question mark should be visible while awaiting');
+  assert.ok(
+    html.includes('loading-spinner'),
+    'loading spinner should be rendered while awaiting'
+  );
+});
+
+test('renders face after finishing response', () => {
+  const html = ReactDOMServer.renderToString(
+    React.createElement(RobotEyes, {
+      facePosition: facePos,
+      isListening: false,
+      isAwaitingResponse: false,
+      isProcessing: false,
+    })
   );
   assert.ok(html.includes('boca.png'), 'mouth image should be rendered');
-  assert.ok(!html.includes('?'), 'question mark should be hidden');
+  assert.ok(!html.includes('?'), 'question mark should be hidden after response');
 });

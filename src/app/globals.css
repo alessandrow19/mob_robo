@@ -221,6 +221,17 @@ body {
   z-index: 1;
 }
 
+.loading-spinner {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(0, 234, 255, 0.2);
+  border-top-color: #00eaff;
+  animation: loading-spin 1s linear infinite;
+  z-index: 3;
+}
+
 @keyframes question-pulse {
   0%,
   100% {
@@ -244,6 +255,15 @@ body {
   50% {
     transform: scale(1.2);
     opacity: 1;
+  }
+}
+
+@keyframes loading-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
