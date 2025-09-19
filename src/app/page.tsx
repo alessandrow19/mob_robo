@@ -25,6 +25,7 @@ export default function Home() {
   const [stopTrigger, setStopTrigger] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
   const [showVoiceButton, setShowVoiceButton] = useState(false);
+  const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
 
   const handleSmile = () => {
     if (!isListening && !isTalking) {
@@ -46,6 +47,13 @@ export default function Home() {
           setIsListening(true);
           setShowVoiceButton(false);
         }}
+        onResponsePendingStart={() => {
+          setIsListening(false);
+          setIsAwaitingResponse(true);
+        }}
+        onResponsePendingEnd={() => {
+          setIsAwaitingResponse(false);
+        }}
         onAudioStart={() => {
           setIsListening(false);
           setIsTalking(true);
@@ -54,6 +62,7 @@ export default function Home() {
           setIsListening(false);
           setIsTalking(false);
           setShowVoiceButton(false);
+          setIsAwaitingResponse(false);
         }}
       />
 
@@ -62,6 +71,7 @@ export default function Home() {
           facePosition={facePosition}
           isListening={isListening}
           isProcessing={isTalking}
+          isAwaitingResponse={isAwaitingResponse}
         />
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>

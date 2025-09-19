@@ -3,12 +3,89 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getVoiceUrl } from "../utils/pollinations.js";
 
+type AudioConstructor = new (src: string) => HTMLAudioElement;
+
+type AudioPlaybackDependencies = {
+  fetchImpl?: typeof fetch;
+  AudioClass?: AudioConstructor;
+  getVoiceUrlFn?: typeof getVoiceUrl;
+  urlCreator?: Pick<typeof URL, "createObjectURL" | "revokeObjectURL">;
+};
+
+type AudioPlaybackCallbacks = {
+  onResponsePendingEnd?: () => void;
+  onAudioStart?: () => void;
+  onPlaybackComplete?: () => void;
+};
+
+export async function fetchAndPlayPollinationsAudio(
+  prompt: string,
+  {
+    fetchImpl = fetch,
+    AudioClass = Audio,
+    getVoiceUrlFn = getVoiceUrl,
+    urlCreator = URL,
+  }: AudioPlaybackDependencies = {},
+  {
+    onResponsePendingEnd,
+    onAudioStart,
+    onPlaybackComplete,
+  }: AudioPlaybackCallbacks = {}
+) {
+  const audioResponse = await fetchImpl(getVoiceUrlFn(prompt), {
+    headers: {
+      Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
+      Authorization: "Bearer sc6EZeTBRIf51QHl",
+    },
+    cache: "no-store",
+    mode: "cors",
+  });
+
+  if (!audioResponse.ok) {
+    console.error(
+      "Falha ao obter áudio do Pollinations",
+      audioResponse.status,
+      audioResponse.statusText
+    );
+    throw new Error(
+      `Falha ao obter áudio: ${audioResponse.status} ${audioResponse.statusText}`
+    );
+  }
+
+  const blob = await audioResponse.blob();
+  if (!blob || blob.size === 0) {
+    console.error("Blob de áudio vazio");
+    throw new Error("Áudio vazio");
+  }
+
+  const url = urlCreator.createObjectURL(blob);
+  const audio = new AudioClass(url);
+
+  audio.onended = () => {
+    urlCreator.revokeObjectURL(url);
+    if (onPlaybackComplete) onPlaybackComplete();
+  };
+
+  try {
+    if (onResponsePendingEnd) onResponsePendingEnd();
+    const playPromise = audio.play();
+    if (onAudioStart) onAudioStart();
+    if (playPromise !== undefined) await playPromise;
+    return audio;
+  } catch (playError) {
+    urlCreator.revokeObjectURL(url);
+    throw playError;
+  }
+}
+
 type VoiceAssistantProps = {
   trigger: number;
   stopTrigger?: number;
   onStart?: () => void;
   onEnd?: () => void;
   onAudioStart?: () => void;
+  onResponsePendingStart?: () => void;
+  onResponsePendingEnd?: () => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -36,6 +113,8 @@ export default function VoiceAssistant({
   onStart,
   onEnd,
   onAudioStart,
+  onResponsePendingStart,
+  onResponsePendingEnd,
 }: VoiceAssistantProps) {
   const [status, setStatus] = useState<"idle" | "listening" | "responding">(
     "idle"
@@ -75,9 +154,10 @@ export default function VoiceAssistant({
       audioRef.current = null;
     }
 
+    if (onResponsePendingEnd) onResponsePendingEnd();
     updateStatus("idle");
     if (onEnd) onEnd();
-  }, [cleanupRecognition, onEnd, updateStatus]);
+  }, [cleanupRecognition, onEnd, onResponsePendingEnd, updateStatus]);
 
   const startListening = useCallback(() => {
     if (statusRef.current !== "idle") return;
@@ -119,6 +199,7 @@ export default function VoiceAssistant({
       }
 
       updateStatus("responding");
+      if (onResponsePendingStart) onResponsePendingStart();
 
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
@@ -129,48 +210,20 @@ export default function VoiceAssistant({
           audioRef.current = null;
         }
 
-        const audioResponse = await fetch(getVoiceUrl(astronomyPrompt), {
-          headers: {
-            Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
-            Authorization: "Bearer sc6EZeTBRIf51QHl",
-          },
-          cache: "no-store",
-          mode: "cors",
-        });
+        const audio = await fetchAndPlayPollinationsAudio(
+          astronomyPrompt,
+          undefined,
+          {
+            onResponsePendingEnd,
+            onAudioStart,
+            onPlaybackComplete: () => {
+              audioRef.current = null;
+              resetToIdle();
+            },
+          }
+        );
 
-        if (!audioResponse.ok) {
-          console.error(
-            "Falha ao obter áudio do Pollinations",
-            audioResponse.status,
-            audioResponse.statusText
-          );
-          throw new Error("Falha ao obter áudio");
-        }
-
-        const blob = await audioResponse.blob();
-        if (!blob || blob.size === 0) {
-          console.error("Blob de áudio vazio");
-          throw new Error("Áudio vazio");
-        }
-
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
         audioRef.current = audio;
-
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          audioRef.current = null;
-          resetToIdle();
-        };
-
-        try {
-          const playPromise = audio.play();
-          if (playPromise !== undefined) await playPromise;
-          if (onAudioStart) onAudioStart();
-        } catch (playError) {
-          console.error("Erro ao reproduzir áudio do Pollinations:", playError);
-          throw playError;
-        }
       } catch (error) {
         console.error("Erro ao obter resposta:", error);
         resetToIdle();
@@ -178,9 +231,18 @@ export default function VoiceAssistant({
     };
 
     recognition.onerror = () => {
+      if (onResponsePendingEnd) onResponsePendingEnd();
       resetToIdle();
     };
-  }, [cleanupRecognition, onAudioStart, onStart, resetToIdle, updateStatus]);
+  }, [
+    cleanupRecognition,
+    onAudioStart,
+    onResponsePendingEnd,
+    onResponsePendingStart,
+    onStart,
+    resetToIdle,
+    updateStatus,
+  ]);
 
   useEffect(() => {
     if (trigger > 0) {
@@ -190,9 +252,16 @@ export default function VoiceAssistant({
 
   useEffect(() => {
     if (stopTrigger > 0) {
-      resetToIdle();
+      if (statusRef.current === "responding") {
+        cleanupRecognition();
+        return;
+      }
+
+      if (statusRef.current === "listening") {
+        resetToIdle();
+      }
     }
-  }, [stopTrigger, resetToIdle]);
+  }, [cleanupRecognition, resetToIdle, stopTrigger]);
 
   return null;
 }
