@@ -184,10 +184,34 @@ body {
   opacity: 1;
 }
 
-.mouth-sprite {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
+.mouth-shape {
+  width: 82px;
+  border-radius: 9999px;
+  transition: transform 0.18s ease-in-out;
+}
+
+.mouth-closed {
+  height: 14px;
+  background: linear-gradient(180deg, #ff6a9f 0%, #ff3f7d 45%, #b1003a 100%);
+  box-shadow: 0 2px 6px rgba(255, 90, 144, 0.4);
+}
+
+.mouth-open {
+  height: 48px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #ff6a9f 0%, #ff4d86 40%, #7a0038 100%);
+  box-shadow: 0 4px 12px rgba(255, 90, 144, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mouth-open-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 30%, #ff97b8 0%, #c30446 45%, #25000f 100%);
+  border: 3px solid rgba(255, 204, 220, 0.65);
 }
 
 @keyframes funny-color {
