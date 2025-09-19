@@ -9,6 +9,8 @@ type VoiceAssistantProps = {
   onStart?: () => void;
   onEnd?: () => void;
   onAudioStart?: () => void;
+  onResponsePendingStart?: () => void;
+  onResponsePendingEnd?: () => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -36,6 +38,8 @@ export default function VoiceAssistant({
   onStart,
   onEnd,
   onAudioStart,
+  onResponsePendingStart,
+  onResponsePendingEnd,
 }: VoiceAssistantProps) {
   const [status, setStatus] = useState<"idle" | "listening" | "responding">(
     "idle"
@@ -75,9 +79,10 @@ export default function VoiceAssistant({
       audioRef.current = null;
     }
 
+    if (onResponsePendingEnd) onResponsePendingEnd();
     updateStatus("idle");
     if (onEnd) onEnd();
-  }, [cleanupRecognition, onEnd, updateStatus]);
+  }, [cleanupRecognition, onEnd, onResponsePendingEnd, updateStatus]);
 
   const startListening = useCallback(() => {
     if (statusRef.current !== "idle") return;
@@ -119,6 +124,7 @@ export default function VoiceAssistant({
       }
 
       updateStatus("responding");
+      if (onResponsePendingStart) onResponsePendingStart();
 
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
@@ -164,6 +170,7 @@ export default function VoiceAssistant({
         };
 
         try {
+          if (onResponsePendingEnd) onResponsePendingEnd();
           const playPromise = audio.play();
           if (playPromise !== undefined) await playPromise;
           if (onAudioStart) onAudioStart();
@@ -178,9 +185,18 @@ export default function VoiceAssistant({
     };
 
     recognition.onerror = () => {
+      if (onResponsePendingEnd) onResponsePendingEnd();
       resetToIdle();
     };
-  }, [cleanupRecognition, onAudioStart, onStart, resetToIdle, updateStatus]);
+  }, [
+    cleanupRecognition,
+    onAudioStart,
+    onResponsePendingEnd,
+    onResponsePendingStart,
+    onStart,
+    resetToIdle,
+    updateStatus,
+  ]);
 
   useEffect(() => {
     if (trigger > 0) {
