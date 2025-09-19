@@ -124,6 +124,65 @@ body {
   }
 }
 
+@keyframes mouth-idle-wave {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.05);
+  }
+}
+
+@keyframes mouth-talking-chomp {
+  0% {
+    transform: scaleY(1.05) translateY(-1px);
+  }
+  30% {
+    transform: scaleY(1.15) translateY(-3px);
+  }
+  60% {
+    transform: scaleY(0.92) translateY(2px);
+  }
+  100% {
+    transform: scaleY(1.05) translateY(-1px);
+  }
+}
+
+.boca {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 90px;
+  transform-origin: center;
+}
+
+.mouth-idle {
+  animation: mouth-idle-wave 2.8s ease-in-out infinite;
+  opacity: 0.95;
+}
+
+.mouth-talking {
+  animation: mouth-talking-chomp 0.55s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(0, 234, 255, 0.55));
+}
+
+.mouth-frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.18s ease-in-out;
+}
+
+.mouth-frame-visible {
+  opacity: 1;
+}
+
 @keyframes funny-color {
   0% {
     filter: hue-rotate(-20deg) brightness(1.2);

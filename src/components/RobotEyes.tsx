@@ -9,6 +9,8 @@ import {
   Expression,
 } from "./robotEyesUtils";
 
+const MOUTH_FRAMES = ["/face/boca.png", "/face/boca2.png"] as const;
+
 type RobotEyesProps = {
   facePosition: {
     x: number;
@@ -26,6 +28,7 @@ export default function RobotEyes({
   isProcessing = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
+  const [mouthFrameIndex, setMouthFrameIndex] = useState(0);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -35,6 +38,21 @@ export default function RobotEyes({
 
     return () => clearInterval(blinkInterval);
   }, []);
+
+  useEffect(() => {
+    if (!isProcessing) {
+      setMouthFrameIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setMouthFrameIndex((previousFrame) =>
+        (previousFrame + 1) % MOUTH_FRAMES.length
+      );
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [isProcessing]);
 
   const expression: Expression = determineExpression(
     facePosition.x,
@@ -97,8 +115,20 @@ export default function RobotEyes({
         </div>
       </div>
 
-      <div className="boca animate-pulse">
-        <Image src="/face/boca.png" alt="Boca" width={80} height={80} />
+      <div
+        className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
+        aria-hidden="true"
+      >
+        {MOUTH_FRAMES.map((frameSrc, index) => (
+          <div
+            key={frameSrc}
+            className={`mouth-frame ${
+              mouthFrameIndex === index ? "mouth-frame-visible" : ""
+            }`}
+          >
+            <Image src={frameSrc} alt="Boca" width={90} height={90} />
+          </div>
+        ))}
       </div>
     </div>
   );
