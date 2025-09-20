@@ -30,6 +30,14 @@ export default function RobotEyes({
   const [isBlinking, setIsBlinking] = useState(false);
   const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
 
+  // Padrões alternados de barras luminosas simulando um equalizador digital
+  const mouthPatterns: number[][] = [
+    [0.35, 0.75, 1, 0.6, 0.4],
+    [0.8, 0.5, 0.95, 0.55, 0.7],
+  ];
+
+  const activePattern = mouthPatterns[mouthFrame];
+
   useEffect(() => {
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
@@ -145,7 +153,15 @@ export default function RobotEyes({
           }`}
         >
           <div className="mouth-shape mouth-open">
-            <div className="mouth-open-inner" />
+            <div className="mouth-open-inner">
+              {activePattern.map((scale, index) => (
+                <span
+                  key={`mouth-bar-${index}`}
+                  className="mouth-bar"
+                  style={{ transform: `scaleY(${scale})` }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
