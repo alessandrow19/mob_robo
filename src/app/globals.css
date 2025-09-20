@@ -185,49 +185,50 @@ body {
 }
 
 .mouth-shape {
-  width: 86px;
-  border-radius: 90% 90% 60% 60% / 130% 130% 70% 70%;
-  transition: transform 0.18s ease-in-out;
+  width: 120px;
+  border-radius: 18px;
   position: relative;
   overflow: hidden;
+  transition: transform 0.18s ease-in-out;
+  border: 2px solid rgba(0, 214, 255, 0.55);
+  background: radial-gradient(circle at 50% 110%, rgba(0, 120, 180, 0.9), rgba(0, 32, 64, 0.85));
+  box-shadow: inset 0 0 12px rgba(0, 200, 255, 0.35);
 }
 
-/* Boca redesenhada com a paleta azul dos olhos para reforçar o sorriso */
+/* Boca redesenhada em formato de visor com brilho neon */
 .mouth-closed {
   height: 18px;
-  background: linear-gradient(180deg, #66f6ff 0%, #00d2ff 48%, #0065ff 100%);
-  box-shadow: 0 3px 8px rgba(0, 195, 255, 0.45);
+  background: linear-gradient(90deg, rgba(0, 247, 255, 0.8), rgba(0, 132, 255, 0.9));
+  box-shadow: inset 0 -2px 6px rgba(0, 91, 255, 0.45), 0 4px 10px rgba(0, 214, 255, 0.35);
 }
 
 .mouth-closed::after {
   content: "";
   position: absolute;
-  inset: 3px 10px 6px;
+  inset: 4px 12px;
   border-radius: 9999px;
-  border-top: 3px solid rgba(255, 255, 255, 0.7);
-  border-bottom: 3px solid transparent;
-  opacity: 0.9;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+  opacity: 0.7;
   pointer-events: none;
 }
 
 .mouth-open {
-  height: 50px;
-  padding: 8px 12px;
-  background: linear-gradient(180deg, #66f6ff 0%, #00c8ff 45%, #004fdf 100%);
-  box-shadow: 0 6px 14px rgba(0, 170, 255, 0.45);
+  height: 56px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.35), rgba(0, 90, 180, 0.9));
+  box-shadow: inset 0 -10px 18px rgba(0, 110, 255, 0.55), 0 0 22px rgba(0, 210, 255, 0.35);
 }
 
 .mouth-open::after {
   content: "";
   position: absolute;
-  inset: 6px 12px;
-  border-radius: 9999px;
-  border-top: 4px solid rgba(255, 255, 255, 0.55);
-  border-bottom: 4px solid transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 200, 255, 0.35));
+  inset: 6px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(132, 244, 255, 0.5);
+  box-shadow: 0 0 14px rgba(0, 214, 255, 0.3);
   pointer-events: none;
   z-index: 1;
 }
@@ -235,11 +236,26 @@ body {
 .mouth-open-inner {
   width: 100%;
   height: 100%;
-  border-radius: inherit;
-  background: radial-gradient(circle at 50% 35%, #0df8ff 0%, #007ce6 55%, #001a33 100%);
-  border: 3px solid rgba(174, 236, 255, 0.7);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(0, 60, 120, 0.9), rgba(0, 10, 30, 0.95));
+  border: 1px solid rgba(0, 214, 255, 0.45);
   position: relative;
   z-index: 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 10px;
+}
+
+.mouth-bar {
+  width: 10px;
+  height: 100%;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.85), rgba(0, 120, 255, 0.8));
+  box-shadow: 0 0 12px rgba(0, 214, 255, 0.55);
+  transform-origin: bottom;
+  transition: transform 0.18s ease-in-out;
 }
 
 @keyframes funny-color {
