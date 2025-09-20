@@ -67,7 +67,7 @@ test('does not render question mark while processing audio', () => {
 
   assert.ok(!html.includes('question-icon'), 'question mark should be hidden during playback');
   assert.ok(
-    html.includes('mouth-talk-open'),
+    html.includes('mouth-open'),
     'robot mouth should remain visible while processing'
   );
 });

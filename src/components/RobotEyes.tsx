@@ -28,7 +28,9 @@ export default function RobotEyes({
   isAwaitingResponse = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
-  const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
+  // Mantemos um índice simples para alternar entre três formatos de boca
+  // (fechada, semiaberta e totalmente aberta) durante a fala.
+  const [mouthFrame, setMouthFrame] = useState<0 | 1 | 2>(0);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -46,8 +48,8 @@ export default function RobotEyes({
     }
 
     const mouthInterval = setInterval(() => {
-      setMouthFrame((prev) => (prev === 0 ? 1 : 0));
-    }, 180);
+      setMouthFrame((prev) => ((prev + 1) % 3) as typeof mouthFrame);
+    }, 160);
 
     return () => clearInterval(mouthInterval);
   }, [isProcessing]);
@@ -132,24 +134,21 @@ export default function RobotEyes({
         aria-hidden="true"
       >
         {!isProcessing ? (
-          // Boca permanece como um sorriso estático quando não está processando áudio
-          <Image
-            src="/face/boca.png"
-            alt="Sorriso do robô"
-            width={120}
-            height={60}
-            className="mouth-smile"
-          />
+          // A nova boca sorridente é desenhada via CSS para ganhar mais volume e brilho.
+          <div className="mouth-smile" aria-hidden>
+            <span className="mouth-smile-lip" />
+            <span className="mouth-smile-highlight" />
+          </div>
         ) : (
-          <div className="talking-mouth">
-            {/* Alternância simples entre formatos semicirculares para simular a fala */}
+          <div className="talking-mouth" aria-hidden>
+            {/* Alternamos entre três formatos para reproduzir o efeito de "boca do Blender" */}
             <div
               className={`mouth-frame ${
                 mouthFrame === 0 ? "mouth-visible" : ""
               }`}
             >
-              <div className="mouth-talk mouth-talk-closed">
-                <span className="mouth-talk-highlight" />
+              <div className="mouth-shape mouth-closed">
+                <span className="mouth-shine" />
               </div>
             </div>
             <div
@@ -157,8 +156,17 @@ export default function RobotEyes({
                 mouthFrame === 1 ? "mouth-visible" : ""
               }`}
             >
-              <div className="mouth-talk mouth-talk-open">
-                <span className="mouth-talk-highlight" />
+              <div className="mouth-shape mouth-mid">
+                <span className="mouth-shine" />
+              </div>
+            </div>
+            <div
+              className={`mouth-frame ${
+                mouthFrame === 2 ? "mouth-visible" : ""
+              }`}
+            >
+              <div className="mouth-shape mouth-open">
+                <span className="mouth-shine" />
               </div>
             </div>
           </div>
