@@ -49,8 +49,8 @@ test('renders face after finishing response', () => {
     })
   );
   assert.ok(
-    html.includes('mouth-closed'),
-    'closed mouth shape should be rendered'
+    html.includes('mouth-smile'),
+    'static smiling mouth should be rendered'
   );
   assert.ok(!html.includes('?'), 'question mark should be hidden after response');
 });
@@ -67,7 +67,7 @@ test('does not render question mark while processing audio', () => {
 
   assert.ok(!html.includes('question-icon'), 'question mark should be hidden during playback');
   assert.ok(
-    html.includes('mouth-open-inner'),
+    html.includes('mouth-talk-open'),
     'robot mouth should remain visible while processing'
   );
 });
