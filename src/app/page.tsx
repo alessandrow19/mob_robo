@@ -10,6 +10,7 @@ import {
   handleSmileInteraction,
   handleAngryInteraction,
 } from "@/utils/interactionHandlers";
+import AstronautScene from "@/components/AstronautScene";
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -40,6 +41,8 @@ export default function Home() {
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
+      {/* Cenário espacial fixo para ambientar o robô como astronauta */}
+      <AstronautScene />
       <VoiceAssistant
         trigger={listenTrigger}
         stopTrigger={stopTrigger}
