@@ -18,11 +18,6 @@ export default function UniverseBackground() {
       <div className="stars-layer">
         <div className="stars-twinkle"></div>
       </div>
-      <div className="comet-layer" aria-hidden>
-        <span className="comet comet-1" />
-        <span className="comet comet-2" />
-        <span className="comet comet-3" />
-      </div>
     </div>
   );
 }
