@@ -105,12 +105,12 @@ body {
 
 .helmet {
   position: relative;
-  width: 500px; /* Largura do corpo do astronauta */
-  height: 450px; /* Altura útil para encaixar os olhos e a boca */
-  overflow: hidden; /* Mantém olhos e boca dentro da ilustração */
-  background-image: url("/face/astronaut-body.svg"); /* Novo corpo com capacete */
-  background-size: cover; /* Ajusta a imagem para cobrir o contêiner */
-  background-position: center; /* Centraliza a ilustração */
+  width: 500px; /* Largura do capacete */
+  height: 450px; /* Altura do capacete */
+  overflow: hidden; /* Garante que os olhos não saiam do capacete */
+  background-image: url("/face/capacete.png");
+  background-size: cover; /* Ajusta a imagem para cobrir o capacete */
+  background-position: center; /* Centraliza a imagem */
   z-index: 100;
 }
 
