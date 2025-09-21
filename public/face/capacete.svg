@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" role="img" aria-labelledby="title desc">
+  <title id="title">Capacete estilizado de robô</title>
+  <desc id="desc">Capacete branco com detalhes azuis e visor oval escuro.</desc>
+  <defs>
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8fbff" />
+      <stop offset="55%" stop-color="#e4f1ff" />
+      <stop offset="100%" stop-color="#b9d8ff" />
+    </linearGradient>
+    <radialGradient id="visorGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#1a2338" />
+      <stop offset="45%" stop-color="#090e1a" />
+      <stop offset="100%" stop-color="#05070e" />
+    </radialGradient>
+    <linearGradient id="trim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5de5ff" />
+      <stop offset="100%" stop-color="#0b96ff" />
+    </linearGradient>
+    <linearGradient id="innerTrim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c5cff" />
+      <stop offset="100%" stop-color="#04204c" />
+    </linearGradient>
+    <linearGradient id="neckGradient" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#122f61" />
+      <stop offset="100%" stop-color="#081632" />
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <path
+      d="M150 12c-56 0-108 44-108 122 0 46 16 86 45 112l-18 84c-4 18 10 34 28 34h106c18 0 32-16 28-34l-18-84c29-26 45-66 45-112C258 56 206 12 150 12z"
+      fill="url(#bodyGradient)"
+      stroke="#0f1a30"
+      stroke-opacity="0.18"
+      stroke-width="8"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M150 36c-46 0-88 36-88 100 0 80 60 116 88 116s88-36 88-116c0-64-42-100-88-100z"
+      fill="url(#visorGlow)"
+      stroke="#0b96ff"
+      stroke-opacity="0.35"
+      stroke-width="10"
+    />
+    <path
+      d="M150 330c-38 0-74 8-90 20 18 32 58 54 90 54s72-22 90-54c-16-12-52-20-90-20z"
+      fill="#e9f5ff"
+      stroke="#0f1a30"
+      stroke-opacity="0.12"
+      stroke-width="6"
+    />
+    <path
+      d="M150 348c-36 0-66 6-84 16 18 28 52 46 84 46s66-18 84-46c-18-10-48-16-84-16z"
+      fill="url(#neckGradient)"
+    />
+    <path
+      d="M150 100c-42 0-76 34-76 92 0 34 12 62 30 80 30 12 62 12 92 0 18-18 30-46 30-80 0-58-34-92-76-92z"
+      fill="rgba(0,163,255,0.12)"
+      stroke="url(#innerTrim)"
+      stroke-width="4"
+      opacity="0.7"
+    />
+    <path
+      d="M150 20c-52 0-100 42-100 118 0 50 18 94 50 124l-18 80c-4 14 6 26 20 26h96c14 0 24-12 20-26l-18-80c32-30 50-74 50-124 0-76-48-118-100-118z"
+      fill="none"
+      stroke="url(#trim)"
+      stroke-width="6"
+      stroke-linecap="round"
+    />
+    <ellipse cx="150" cy="78" rx="78" ry="30" fill="rgba(255,255,255,0.35)" opacity="0.65" />
+    <path
+      d="M120 370c6 16 18 26 30 26s24-10 30-26"
+      stroke="#4fd8ff"
+      stroke-width="6"
+      stroke-linecap="round"
+      opacity="0.6"
+    />
+    <path
+      d="M112 318c-10 0-20 4-28 10 18 28 58 46 96 46 38 0 78-18 96-46-8-6-18-10-28-10H112z"
+      fill="#f5fbff"
+      opacity="0.8"
+    />
+  </g>
+</svg>
