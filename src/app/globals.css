@@ -110,7 +110,7 @@ body {
   overflow: hidden; /* Garante que os olhos não saiam do capacete */
   background-image: url("/face/capacete.png");
   background-size: cover; /* Ajusta a imagem para cobrir o capacete */
-  background-position: center; /* Centraliza a imagem */
+  background-position: center 37%; /* Reposiciona o visor do novo capacete para coincidir com o enquadramento original */
   z-index: 100;
 }
 
