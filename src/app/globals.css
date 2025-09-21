@@ -165,7 +165,7 @@ body {
 
 .mouth-talking {
   animation: mouth-talking-chomp 0.45s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.6));
+  filter: drop-shadow(0 0 8px rgba(0, 234, 255, 0.55));
 }
 
 .mouth-frame {
@@ -184,104 +184,48 @@ body {
 }
 
 .mouth-smile {
-  position: relative;
-  width: 128px;
-  height: 56px;
-  border-radius: 0 0 120px 120px;
-  border: 3px solid rgba(0, 220, 255, 0.7);
-  background: radial-gradient(120% 180% at 50% 0%, rgba(255, 255, 255, 0.7), rgba(0, 110, 220, 0.6) 45%, rgba(0, 40, 120, 0.85));
-  box-shadow:
-    inset 0 -8px 18px rgba(0, 90, 200, 0.55),
-    inset 0 6px 14px rgba(255, 255, 255, 0.45),
-    0 12px 24px rgba(0, 174, 255, 0.25);
-  overflow: hidden;
-  filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.5));
+  width: 120px;
+  height: auto;
+  filter: drop-shadow(0 0 8px rgba(0, 234, 255, 0.35));
 }
 
-.mouth-smile::before {
-  content: "";
-  position: absolute;
-  inset: 12px 18px auto;
-  height: 16px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
-  opacity: 0.85;
-}
-
-.mouth-smile::after {
-  content: "";
-  position: absolute;
-  inset: auto 8px -18px;
-  height: 46px;
-  border-radius: 9999px 9999px 0 0;
-  background: radial-gradient(140% 120% at 50% 80%, rgba(255, 255, 255, 0.35), rgba(0, 134, 255, 0.75));
-  opacity: 0.85;
-}
-
-.mouth-smile-lip {
-  position: absolute;
-  inset: auto 10px 2px;
-  height: 18px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.65), rgba(120, 220, 255, 0));
-  opacity: 0.8;
-}
-
-.mouth-smile-highlight {
-  position: absolute;
-  inset: 8px 40px auto;
-  height: 12px;
-  border-radius: 9999px;
-  background: radial-gradient(100% 120% at 10% 10%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
-  mix-blend-mode: screen;
-}
-
-/* Contêiner mantém os quadros da boca em fala */
+/* Contêiner que mantém os dois quadros semicirculares usados durante a fala */
 .talking-mouth {
   position: relative;
-  width: 128px;
-  height: 72px;
-}
-
-/* Base compartilhada dos três formatos que simulam a fala no estilo "Blender" */
-.mouth-shape {
-  width: 124px;
-  border: 3px solid rgba(0, 220, 255, 0.75);
-  border-radius: 0 0 110px 110px;
-  background: radial-gradient(110% 160% at 50% 15%, rgba(255, 255, 255, 0.75), rgba(0, 110, 240, 0.65) 55%, rgba(0, 30, 110, 0.85));
-  box-shadow:
-    inset 0 -12px 22px rgba(0, 90, 210, 0.55),
-    inset 0 6px 14px rgba(255, 255, 255, 0.4);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  transition: border-radius 0.12s ease-in-out;
-}
-
-.mouth-closed {
-  height: 26px;
-  border-radius: 0 0 80px 80px;
-}
-
-.mouth-mid {
-  height: 44px;
-  border-radius: 0 0 95px 95px;
-}
-
-.mouth-open {
+  width: 120px;
   height: 64px;
 }
 
-.mouth-shine {
+/* Base compartilhada dos formatos semicirculares que simulam a boca falando */
+.mouth-talk {
+  width: 120px;
+  border-radius: 0 0 9999px 9999px;
+  border: 2px solid rgba(0, 214, 255, 0.6);
+  background: linear-gradient(180deg, rgba(0, 180, 255, 0.85), rgba(0, 50, 120, 0.9));
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 -8px 16px rgba(0, 140, 255, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mouth-talk-closed {
+  height: 26px;
+}
+
+.mouth-talk-open {
+  height: 56px;
+}
+
+.mouth-talk-highlight {
   position: absolute;
-  inset: auto 22px 12px;
-  height: 16px;
+  inset: auto 18px 10px;
+  height: 12px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(180, 230, 255, 0));
-  opacity: 0.8;
-  mix-blend-mode: screen;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 @keyframes funny-color {
