@@ -30,6 +30,14 @@ export default function RobotEyes({
   const [isBlinking, setIsBlinking] = useState(false);
   const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
 
+  // Padrões alternados de barras luminosas simulando um equalizador digital
+  const mouthPatterns: number[][] = [
+    [0.35, 0.75, 1, 0.6, 0.4],
+    [0.8, 0.5, 0.95, 0.55, 0.7],
+  ];
+
+  const activePattern = mouthPatterns[mouthFrame];
+
   useEffect(() => {
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
@@ -131,38 +139,31 @@ export default function RobotEyes({
         className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
         aria-hidden="true"
       >
-        {!isProcessing ? (
-          // Boca permanece como um sorriso estático quando não está processando áudio
-          <Image
-            src="/face/boca.png"
-            alt="Sorriso do robô"
-            width={120}
-            height={60}
-            className="mouth-smile"
-          />
-        ) : (
-          <div className="talking-mouth">
-            {/* Alternância simples entre formatos semicirculares para simular a fala */}
-            <div
-              className={`mouth-frame ${
-                mouthFrame === 0 ? "mouth-visible" : ""
-              }`}
-            >
-              <div className="mouth-talk mouth-talk-closed">
-                <span className="mouth-talk-highlight" />
-              </div>
-            </div>
-            <div
-              className={`mouth-frame ${
-                mouthFrame === 1 ? "mouth-visible" : ""
-              }`}
-            >
-              <div className="mouth-talk mouth-talk-open">
-                <span className="mouth-talk-highlight" />
-              </div>
+        {/* Frames alternam entre boca fechada e aberta usando formas geométricas simples */}
+        <div
+          className={`mouth-frame ${
+            !isProcessing || mouthFrame === 0 ? "mouth-visible" : ""
+          }`}
+        >
+          <div className="mouth-shape mouth-closed" />
+        </div>
+        <div
+          className={`mouth-frame ${
+            isProcessing && mouthFrame === 1 ? "mouth-visible" : ""
+          }`}
+        >
+          <div className="mouth-shape mouth-open">
+            <div className="mouth-open-inner">
+              {activePattern.map((scale, index) => (
+                <span
+                  key={`mouth-bar-${index}`}
+                  className="mouth-bar"
+                  style={{ transform: `scaleY(${scale})` }}
+                />
+              ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
