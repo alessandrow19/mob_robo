@@ -117,13 +117,15 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/face/capacete.png");
-  background-size: cover;
+  background-image: url("/face/capacete.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.55;
+  opacity: 0.7;
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 0;
+  /* Aumentamos a opacidade para que o novo corpo fique visível sem esconder olhos e boca. */
 }
 
 .helmet-backlight {
