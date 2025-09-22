@@ -106,7 +106,7 @@ body {
 .helmet {
   position: relative;
   width: 500px; /* Largura do capacete */
-  height: 450px; /* Altura do capacete */
+  height: 750px; /* Altura do capacete */
   overflow: hidden; /* Garante que os olhos não saiam do capacete */
   background-image: url("/face/capacete.png");
   background-size: cover; /* Ajusta a imagem para cobrir o capacete */
@@ -179,4 +179,10 @@ body {
     transform: scale(1.2);
     opacity: 1;
   }
+}
+
+
+.boca{
+
+ margin-top:-20px
 }

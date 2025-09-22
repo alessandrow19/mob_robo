@@ -116,6 +116,7 @@ export default function VoiceAssistant({
             // ajuda alguns browsers a escolherem o decodificador
             headers: {
               Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
+              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
             },
             cache: "no-store",
             mode: "cors",
@@ -127,13 +128,13 @@ export default function VoiceAssistant({
               audioResponse.status,
               audioResponse.statusText
             );
-            throw new Error("Falha ao obter áudio");
+            return;
           }
 
           const blob = await audioResponse.blob();
           if (!blob || blob.size === 0) {
             console.error("Blob de áudio vazio");
-            throw new Error("Áudio vazio");
+            return;
           }
 
           const url = URL.createObjectURL(blob);
@@ -143,15 +144,15 @@ export default function VoiceAssistant({
           try {
             const playPromise = audio.play();
             if (playPromise !== undefined) await playPromise;
-            if (onAudioStart) onAudioStart();
+            // Chama onAudioStart após iniciar a reprodução
+            if (onAudioStart) {
+              onAudioStart();
+            }
           } catch (playError) {
             console.error("Erro ao reproduzir áudio do Pollinations:", playError);
-            throw playError;
+            return;
           } finally {
-            audio.onended = () => {
-              URL.revokeObjectURL(url);
-              audioRef.current = null;
-            };
+            audio.onended = () => URL.revokeObjectURL(url);
           }
         } catch (audioError) {
           console.error("Erro no TTS:", audioError);

@@ -17,13 +17,20 @@ type RobotEyesProps = {
     videoHeight: number;
   };
   isListening?: boolean;
+  isTalking?: boolean;
 };
 
 export default function RobotEyes({
   facePosition,
   isListening = false,
+  isTalking = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
+
+  // Log o valor de isListening sempre que ele mudar
+  useEffect(() => {
+    console.log("RobotEyes: isListening", isListening);
+  }, [isListening]);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -48,7 +55,9 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  return isListening ? (
+  // Se estiver ouvindo (isListening true) e não estiver tocando áudio (isTalking false), exibe o question-glow
+  // Caso contrário, exibe a face normal
+  return isListening && !isTalking ? (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
       <div className="relative flex items-center justify-center">
         <div className="question-glow"></div>
@@ -56,10 +65,10 @@ export default function RobotEyes({
       </div>
     </div>
   ) : (
-    <div className="flex flex-col items-center justify-center gap-8 helmet">
+    <div className="flex flex-col items-center  gap-8 helmet">
       {/* Olhos */}
       <div
-        className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
+        className="flex items-center justify-center mt-30 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
         style={{
           transform: `translate(${offsetX}px, ${offsetY}px)`,
           opacity: isBlinking ? 0 : 1,
@@ -89,8 +98,8 @@ export default function RobotEyes({
         </div>
       </div>
 
-      <div className="boca animate-pulse">
-        <Image src="/face/boca.png" alt="Boca" width={80} height={80} />
+      <div className="boca items-center  animat-epulse">
+        <Image src="/face/boca.png" alt="Boca" width={60} height={60} />
       </div>
     </div>
   );
