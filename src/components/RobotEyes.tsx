@@ -18,12 +18,16 @@ type RobotEyesProps = {
   };
   isListening?: boolean;
   isTalking?: boolean;
+  isProcessing?: boolean;
+  isAwaitingResponse?: boolean;
 };
 
 export default function RobotEyes({
   facePosition,
   isListening = false,
   isTalking = false,
+  isProcessing = false,
+  isAwaitingResponse = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
 
@@ -55,9 +59,11 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  // Se estiver ouvindo (isListening true) e não estiver tocando áudio (isTalking false), exibe o question-glow
+  // Se estiver ouvindo (isListening true) e não estiver tocando áudio nem processando nem aguardando resposta, exibe o question-glow
   // Caso contrário, exibe a face normal
-  return isListening && !isTalking ? (
+  const showQuestionGlow = isListening && !isTalking && !isProcessing && !isAwaitingResponse;
+
+  return showQuestionGlow ? (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
       <div className="relative flex items-center justify-center">
         <div className="question-glow"></div>
