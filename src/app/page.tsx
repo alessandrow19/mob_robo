@@ -27,16 +27,15 @@ export default function Home() {
   const [showVoiceButton, setShowVoiceButton] = useState(false);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
 
-  const handleSmile = () => {
-    if (!isListening && !isTalking) {
-      setShowVoiceButton(true);
-    }
-  };
-
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   const startVoiceFlow = () => {
     setShowVoiceButton(false);
     handleSmileInteraction(isListening, setIsListening, setListenTrigger);
+  };
+  const handleSmile = () => {
+    if (!isListening && !isTalking) {
+      startVoiceFlow();
+    }
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
@@ -57,6 +56,11 @@ export default function Home() {
         onAudioStart={() => {
           setIsListening(false);
           setIsTalking(true);
+        }}
+        onPermissionDenied={() => {
+          // Quando o navegador exigir interação manual, voltamos a exibir o botão.
+          setIsListening(false);
+          setShowVoiceButton(true);
         }}
         onEnd={() => {
           setIsListening(false);
