@@ -12,6 +12,7 @@ type VoiceAssistantProps = {
   onAudioStart?: () => void;
   onResponsePendingStart?: () => void;
   onResponsePendingEnd?: () => void;
+  onPermissionDenied?: () => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -25,12 +26,16 @@ interface SpeechRecognition {
   abort?: () => void;
   stop?: () => void;
   onresult: ((event: CustomSpeechRecognitionEvent) => void) | null;
-  onerror: ((event: Event) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
 }
 
 interface SpeechRecognitionWindow extends Window {
   webkitSpeechRecognition?: new () => SpeechRecognition;
   SpeechRecognition?: new () => SpeechRecognition;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error?: string;
 }
 
 export default function VoiceAssistant({
@@ -41,6 +46,7 @@ export default function VoiceAssistant({
   onAudioStart,
   onResponsePendingStart,
   onResponsePendingEnd,
+  onPermissionDenied,
 }: VoiceAssistantProps) {
   const [status, setStatus] = useState<"idle" | "listening" | "responding">(
     "idle"
@@ -74,6 +80,7 @@ export default function VoiceAssistant({
   }, []);
 
   const resetToIdle = useCallback(() => {
+    const previousStatus = statusRef.current;
     cleanupRecognition();
 
     if (audioRef.current) {
@@ -82,10 +89,28 @@ export default function VoiceAssistant({
       audioRef.current = null;
     }
 
-    if (onResponsePendingEnd) onResponsePendingEnd();
+    if (previousStatus === "responding" && onResponsePendingEnd) {
+      onResponsePendingEnd();
+    }
     updateStatus("idle");
     if (onEnd) onEnd();
   }, [cleanupRecognition, onEnd, onResponsePendingEnd, updateStatus]);
+
+  const handleStartFailure = useCallback(
+    (error: unknown) => {
+      cleanupRecognition();
+
+      const maybeDomException = error as DOMException | undefined;
+      const permissionDenied =
+        maybeDomException?.name === "NotAllowedError" ||
+        maybeDomException?.name === "SecurityError";
+
+      if (permissionDenied && onPermissionDenied) {
+        onPermissionDenied();
+      }
+    },
+    [cleanupRecognition, onPermissionDenied]
+  );
 
   const startListening = useCallback(() => {
     if (statusRef.current !== "idle") return;
@@ -101,8 +126,18 @@ export default function VoiceAssistant({
 
     const recognition = new SpeechRecognitionClass();
     recognition.lang = "pt-BR";
-    recognition.start();
     recognitionRef.current = recognition;
+
+    try {
+      // Alguns navegadores só permitem iniciar a captura de voz após interação prévia;
+      // o bloco try/catch garante que tratamos esse caso sem travar o fluxo.
+      recognition.start();
+    } catch (error) {
+      console.error("Falha ao iniciar o reconhecimento de voz:", error);
+      handleStartFailure(error);
+      return;
+    }
+
     updateStatus("listening");
     if (onStart) onStart();
 
@@ -198,13 +233,21 @@ export default function VoiceAssistant({
       }
     };
 
-    recognition.onerror = () => {
-      if (onResponsePendingEnd) onResponsePendingEnd();
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      // Reexibe o botão de voz quando a permissão de microfone é negada.
+      if (
+        (event.error === "not-allowed" || event.error === "service-not-allowed") &&
+        onPermissionDenied
+      ) {
+        onPermissionDenied();
+      }
       resetToIdle();
     };
   }, [
     cleanupRecognition,
+    handleStartFailure,
     onAudioStart,
+    onPermissionDenied,
     onResponsePendingEnd,
     onResponsePendingStart,
     onStart,
