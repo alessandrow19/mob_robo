@@ -17,26 +17,20 @@ type RobotEyesProps = {
     videoHeight: number;
   };
   isListening?: boolean;
-  isProcessing?: boolean; // Nova prop para indicar processamento de áudio
-  isAwaitingResponse?: boolean;
+  isTalking?: boolean;
 };
 
 export default function RobotEyes({
   facePosition,
   isListening = false,
-  isProcessing = false,
-  isAwaitingResponse = false,
+  isTalking = false,
 }: RobotEyesProps) {
   const [isBlinking, setIsBlinking] = useState(false);
-  const [mouthFrame, setMouthFrame] = useState<0 | 1>(0);
 
-  // Padrões alternados de barras luminosas simulando um equalizador digital
-  const mouthPatterns: number[][] = [
-    [0.35, 0.75, 1, 0.6, 0.4],
-    [0.8, 0.5, 0.95, 0.55, 0.7],
-  ];
-
-  const activePattern = mouthPatterns[mouthFrame];
+  // Log o valor de isListening sempre que ele mudar
+  useEffect(() => {
+    console.log("RobotEyes: isListening", isListening);
+  }, [isListening]);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -46,19 +40,6 @@ export default function RobotEyes({
 
     return () => clearInterval(blinkInterval);
   }, []);
-
-  useEffect(() => {
-    if (!isProcessing) {
-      setMouthFrame(0);
-      return;
-    }
-
-    const mouthInterval = setInterval(() => {
-      setMouthFrame((prev) => (prev === 0 ? 1 : 0));
-    }, 180);
-
-    return () => clearInterval(mouthInterval);
-  }, [isProcessing]);
 
   const expression: Expression = determineExpression(
     facePosition.x,
@@ -74,38 +55,20 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  const shouldShowQuestion = (isListening || isAwaitingResponse) && !isProcessing;
-
-  // Se está ouvindo ou aguardando resposta e não está processando áudio, mostra interrogação
-  if (shouldShowQuestion) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-8 helmet">
-        <div className="relative flex items-center justify-center">
-          <div className="question-glow"></div>
-          <div className="question-icon text-[120px]">?</div>
-        </div>
-        {isAwaitingResponse && (
-          <div className="processing-indicator" aria-live="polite">
-            {/* Mantemos o texto apenas para leitores de tela */}
-            <span className="sr-only">Processando áudio</span>
-            <div className="loading-dots" aria-hidden="true">
-              {/* Três pontinhos para indicar o processamento sem cobrir o ponto de interrogação */}
-              <span className="loading-dot" />
-              <span className="loading-dot" />
-              <span className="loading-dot" />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Caso contrário, mostra os olhos normalmente
-  return (
+  // Se estiver ouvindo (isListening true) e não estiver tocando áudio (isTalking false), exibe o question-glow
+  // Caso contrário, exibe a face normal
+  return isListening && !isTalking ? (
     <div className="flex flex-col items-center justify-center gap-8 helmet">
+      <div className="relative flex items-center justify-center">
+        <div className="question-glow"></div>
+        <div className="question-icon text-[120px]">?</div>
+      </div>
+    </div>
+  ) : (
+    <div className="flex flex-col items-center  gap-8 helmet">
       {/* Olhos */}
       <div
-        className="flex items-center justify-center gap-8 mt-16 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
+        className="flex items-center justify-center mt-30 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
         style={{
           transform: `translate(${offsetX}px, ${offsetY}px)`,
           opacity: isBlinking ? 0 : 1,
@@ -135,35 +98,8 @@ export default function RobotEyes({
         </div>
       </div>
 
-      <div
-        className={`boca ${isProcessing ? "mouth-talking" : "mouth-idle"}`}
-        aria-hidden="true"
-      >
-        {/* Frames alternam entre boca fechada e aberta usando formas geométricas simples */}
-        <div
-          className={`mouth-frame ${
-            !isProcessing || mouthFrame === 0 ? "mouth-visible" : ""
-          }`}
-        >
-          <div className="mouth-shape mouth-closed" />
-        </div>
-        <div
-          className={`mouth-frame ${
-            isProcessing && mouthFrame === 1 ? "mouth-visible" : ""
-          }`}
-        >
-          <div className="mouth-shape mouth-open">
-            <div className="mouth-open-inner">
-              {activePattern.map((scale, index) => (
-                <span
-                  key={`mouth-bar-${index}`}
-                  className="mouth-bar"
-                  style={{ transform: `scaleY(${scale})` }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="boca items-center  animat-epulse">
+        <Image src="/face/boca.png" alt="Boca" width={60} height={60} />
       </div>
     </div>
   );
