@@ -3,13 +3,14 @@
 import FaceDetection from "@/components/FaceDetection";
 import VideoStream from "@/components/VideoStream";
 import RobotEyes from "@/components/RobotEyes";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
 import VoiceAssistant from "@/components/VoiceAssistant";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
 } from "@/utils/interactionHandlers";
+import DirectionalOverlay from "@/components/DirectionalOverlay";
 
 export default function Home() {
   const [videoElement, setVideoElement] = useState(null);
@@ -26,6 +27,30 @@ export default function Home() {
   const [isTalking, setIsTalking] = useState(false);
   const [showVoiceButton, setShowVoiceButton] = useState(false);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
+  const [showDirectionalModal, setShowDirectionalModal] = useState(false);
+  const directionalModalTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Limpa o temporizador ao desmontar a página para evitar vazamentos.
+  useEffect(() => {
+    return () => {
+      if (directionalModalTimeout.current) {
+        clearTimeout(directionalModalTimeout.current);
+      }
+    };
+  }, []);
+
+  const revealDirectionalModal = () => {
+    setShowDirectionalModal(true);
+
+    if (directionalModalTimeout.current) {
+      clearTimeout(directionalModalTimeout.current);
+    }
+
+    // Mantemos o modal visível por alguns segundos para o usuário entender a orientação.
+    directionalModalTimeout.current = setTimeout(() => {
+      setShowDirectionalModal(false);
+    }, 3500);
+  };
 
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   const startVoiceFlow = () => {
@@ -34,6 +59,7 @@ export default function Home() {
   };
   const handleSmile = () => {
     if (!isListening && !isTalking) {
+      revealDirectionalModal();
       startVoiceFlow();
     }
   };
@@ -67,16 +93,18 @@ export default function Home() {
           setIsTalking(false);
           setShowVoiceButton(false);
           setIsAwaitingResponse(false);
+          setShowDirectionalModal(false);
         }}
       />
 
-      <div className="m-auto flex flex-col items-center">
+      <div className="relative m-auto flex flex-col items-center">
         <RobotEyes
           facePosition={facePosition}
           isListening={isListening}
           isProcessing={isTalking}
           isAwaitingResponse={isAwaitingResponse}
         />
+        <DirectionalOverlay visible={showDirectionalModal} />
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
         <div className="fixed bottom-3 left-3">
