@@ -46,21 +46,26 @@ export default function Home() {
       clearTimeout(directionalModalTimeout.current);
     }
 
-    // Mantemos o modal visível por alguns segundos para o usuário entender a orientação.
+    // Damos um tempo maior para que o usuário possa clicar no botão de voz.
     directionalModalTimeout.current = setTimeout(() => {
       setShowDirectionalModal(false);
-    }, 3500);
+    }, 6500);
   };
 
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
+  // O botão central do overlay chama esta função para iniciar a conversa.
   const startVoiceFlow = () => {
     setShowVoiceButton(false);
+    setShowDirectionalModal(false);
+    if (directionalModalTimeout.current) {
+      clearTimeout(directionalModalTimeout.current);
+      directionalModalTimeout.current = null;
+    }
     handleSmileInteraction(isListening, setIsListening, setListenTrigger);
   };
   const handleSmile = () => {
     if (!isListening && !isTalking) {
       revealDirectionalModal();
-      startVoiceFlow();
     }
   };
   return (
@@ -71,6 +76,7 @@ export default function Home() {
         onStart={() => {
           setIsListening(true);
           setShowVoiceButton(false);
+          setShowDirectionalModal(false);
         }}
         onResponsePendingStart={() => {
           setIsListening(false);
@@ -104,7 +110,11 @@ export default function Home() {
           isProcessing={isTalking}
           isAwaitingResponse={isAwaitingResponse}
         />
-        <DirectionalOverlay visible={showDirectionalModal} />
+        <DirectionalOverlay
+          visible={showDirectionalModal}
+          onActivateVoice={startVoiceFlow}
+          disableVoiceButton={isListening || isTalking || isAwaitingResponse}
+        />
       </div>
       <div className={`container ${isListening || isTalking ? "hidden" : ""}`}>
         <div className="fixed bottom-3 left-3">
