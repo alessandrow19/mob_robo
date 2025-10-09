@@ -59,20 +59,10 @@ export default function RobotEyes({
 
   const expressionStyles = getExpressionStyles(expression);
 
-  // Se estiver ouvindo (isListening true) e não estiver tocando áudio nem processando nem aguardando resposta, exibe o question-glow
-  // Caso contrário, exibe a face normal
-  const showQuestionGlow = isListening && !isTalking && !isProcessing && !isAwaitingResponse;
-
-  return showQuestionGlow ? (
-    <div className="flex flex-col items-center justify-center gap-8 helmet">
-      <div className="relative flex items-center justify-center">
-        <div className="question-glow"></div>
-        <div className="question-icon text-[120px]">?</div>
-      </div>
-    </div>
-  ) : (
+  // A face permanece visível em todos os estados, inclusive durante a escuta ativa.
+  return (
     <div className="flex flex-col items-center  gap-8 helmet">
-      {/* Olhos */}
+      {/* Olhos seguem a posição detectada do rosto e piscam periodicamente para trazer vida ao personagem. */}
       <div
         className="flex items-center justify-center mt-30 overflow-hidden w-[300px] h-[90px] transition-all duration-500"
         style={{
@@ -104,6 +94,7 @@ export default function RobotEyes({
         </div>
       </div>
 
+      {/* Boca permanece renderizada para indicar que o robô está pronto para interagir. */}
       <div className="boca items-center  animat-epulse">
         <Image src="/face/boca.png" alt="Boca" width={60} height={60} />
       </div>

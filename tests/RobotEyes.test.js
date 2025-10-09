@@ -15,59 +15,44 @@ const RobotEyes = require('../build/components/RobotEyes.js').default;
 
 const facePos = { x: 0, y: 0, videoWidth: 0, videoHeight: 0 };
 
-test('renders question mark while listening', () => {
-  const html = ReactDOMServer.renderToString(
-    React.createElement(RobotEyes, { facePosition: facePos, isListening: true })
+function renderRobotEyes(overrides = {}) {
+  return ReactDOMServer.renderToString(
+    React.createElement(RobotEyes, { facePosition: facePos, ...overrides })
   );
-  assert.ok(html.includes('?'), 'question mark should be visible');
-});
+}
 
-test('renders loading dots below question mark while awaiting response', () => {
-  const html = ReactDOMServer.renderToString(
-    React.createElement(RobotEyes, {
-      facePosition: facePos,
-      isAwaitingResponse: true,
-      isProcessing: false,
-    })
-  );
-  assert.ok(html.includes('?'), 'question mark should be visible while awaiting');
-  const dots = html.match(/class=\"loading-dot\"/g) || [];
-  assert.strictEqual(dots.length, 3, 'should render exactly three loading dots');
-
-  const questionIndex = html.indexOf('question-icon');
-  const indicatorIndex = html.indexOf('processing-indicator');
-  assert.ok(indicatorIndex > questionIndex, 'loading dots should appear below the question mark');
-});
-
-test('renders face after finishing response', () => {
-  const html = ReactDOMServer.renderToString(
-    React.createElement(RobotEyes, {
-      facePosition: facePos,
-      isListening: false,
-      isAwaitingResponse: false,
-      isProcessing: false,
-    })
+function assertFaceIsVisible(html) {
+  assert.ok(
+    html.includes('alt="Olho esquerdo"'),
+    'left eye image should be rendered'
   );
   assert.ok(
-    html.includes('mouth-closed'),
-    'closed mouth shape should be rendered'
+    html.includes('alt="Olho direito"'),
+    'right eye image should be rendered'
   );
-  assert.ok(!html.includes('?'), 'question mark should be hidden after response');
+  assert.ok(html.includes('alt="Boca"'), 'mouth image should be rendered');
+  assert.ok(
+    !html.includes('question-icon'),
+    'question icon markup should no longer appear'
+  );
+}
+
+test('keeps face visible while listening', () => {
+  const html = renderRobotEyes({ isListening: true });
+  assertFaceIsVisible(html);
 });
 
-test('does not render question mark while processing audio', () => {
-  const html = ReactDOMServer.renderToString(
-    React.createElement(RobotEyes, {
-      facePosition: facePos,
-      isListening: true,
-      isAwaitingResponse: true,
-      isProcessing: true,
-    })
-  );
+test('keeps face visible while awaiting response', () => {
+  const html = renderRobotEyes({ isAwaitingResponse: true });
+  assertFaceIsVisible(html);
+});
 
-  assert.ok(!html.includes('question-icon'), 'question mark should be hidden during playback');
-  assert.ok(
-    html.includes('mouth-open-inner'),
-    'robot mouth should remain visible while processing'
-  );
+test('keeps face visible after finishing response', () => {
+  const html = renderRobotEyes();
+  assertFaceIsVisible(html);
+});
+
+test('keeps face visible while processing audio', () => {
+  const html = renderRobotEyes({ isProcessing: true });
+  assertFaceIsVisible(html);
 });
