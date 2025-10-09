@@ -25,7 +25,6 @@ export default function Home() {
   const [isListening, setIsListening] = useState(false);
   const [stopTrigger, setStopTrigger] = useState(0);
   const [isTalking, setIsTalking] = useState(false);
-  const [showVoiceButton, setShowVoiceButton] = useState(false);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
   const [showDirectionalModal, setShowDirectionalModal] = useState(false);
   const directionalModalTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -39,23 +38,24 @@ export default function Home() {
     };
   }, []);
 
-  const revealDirectionalModal = () => {
+  const revealDirectionalModal = (autoHide = true) => {
     setShowDirectionalModal(true);
 
     if (directionalModalTimeout.current) {
       clearTimeout(directionalModalTimeout.current);
     }
 
-    // Damos um tempo maior para que o usuário possa clicar no botão de voz.
-    directionalModalTimeout.current = setTimeout(() => {
-      setShowDirectionalModal(false);
-    }, 6500);
+    if (autoHide) {
+      // Damos um tempo maior para que o usuário possa clicar no botão de voz.
+      directionalModalTimeout.current = setTimeout(() => {
+        setShowDirectionalModal(false);
+      }, 6500);
+    }
   };
 
   const handleAngry = () => handleAngryInteraction(isListening, setStopTrigger);
   // O botão central do overlay chama esta função para iniciar a conversa.
   const startVoiceFlow = () => {
-    setShowVoiceButton(false);
     setShowDirectionalModal(false);
     if (directionalModalTimeout.current) {
       clearTimeout(directionalModalTimeout.current);
@@ -75,7 +75,6 @@ export default function Home() {
         stopTrigger={stopTrigger}
         onStart={() => {
           setIsListening(true);
-          setShowVoiceButton(false);
           setShowDirectionalModal(false);
         }}
         onResponsePendingStart={() => {
@@ -90,14 +89,15 @@ export default function Home() {
           setIsTalking(true);
         }}
         onPermissionDenied={() => {
-          // Quando o navegador exigir interação manual, voltamos a exibir o botão.
+          // Quando o navegador exigir interação manual, mantemos o overlay ativo
+          // sem autodesaparecer, garantindo que o botão central seja o único
+          // responsável por iniciar novas capturas de áudio.
           setIsListening(false);
-          setShowVoiceButton(true);
+          revealDirectionalModal(false);
         }}
         onEnd={() => {
           setIsListening(false);
           setIsTalking(false);
-          setShowVoiceButton(false);
           setIsAwaitingResponse(false);
           setShowDirectionalModal(false);
         }}
@@ -146,16 +146,6 @@ export default function Home() {
           )}
         </div>
       </div>
-      {showVoiceButton && !isListening && !isTalking && (
-        <button
-          type="button"
-          onClick={startVoiceFlow}
-          className="voice-button"
-        >
-          <span className="voice-button__glow" />
-          <span className="voice-button__label">Falar com o Robo</span>
-        </button>
-      )}
       {/* Adicione o componente DirectionTracker */}
       <DirectionTracker direction={currentDirection} />
     </div>
