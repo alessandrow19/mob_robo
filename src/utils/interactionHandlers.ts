@@ -1,11 +1,10 @@
 export function handleSmileInteraction(
-  isListening: boolean,
-  setIsListening: (value: boolean) => void,
-  setListenTrigger: (updater: (t: number) => number) => void
+  isVoiceSessionActive: boolean,
+  incrementListenTrigger: (updater: (t: number) => number) => void
 ) {
-  if (!isListening) {
-    setIsListening(true);
-    setListenTrigger((t) => t + 1);
+  // Evitamos múltiplos disparos simultâneos do assistente de voz.
+  if (!isVoiceSessionActive) {
+    incrementListenTrigger((t) => t + 1);
   }
 }
 

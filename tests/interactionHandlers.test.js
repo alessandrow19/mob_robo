@@ -7,38 +7,29 @@ const {
 } = require('../build/utils/interactionHandlers.js');
 
 test('handleSmileInteraction activates listening when idle', () => {
-  let isListening = false;
+  let isVoiceSessionActive = false;
   let listenTrigger = 0;
 
   handleSmileInteraction(
-    isListening,
-    (val) => {
-      isListening = val;
-    },
+    isVoiceSessionActive,
     (updater) => {
       listenTrigger = updater(listenTrigger);
     }
   );
 
-  assert.strictEqual(isListening, true, 'should set listening state');
   assert.strictEqual(listenTrigger, 1, 'should increment listen trigger');
 });
 
 test('handleSmileInteraction does nothing when already listening', () => {
-  let setListeningCalled = false;
   let triggerCalled = false;
 
   handleSmileInteraction(
     true,
     () => {
-      setListeningCalled = true;
-    },
-    () => {
       triggerCalled = true;
     }
   );
 
-  assert.ok(!setListeningCalled, 'should not change listening state');
   assert.ok(!triggerCalled, 'should not trigger again');
 });
 

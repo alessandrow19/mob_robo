@@ -61,7 +61,7 @@ export default function Home() {
       clearTimeout(directionalModalTimeout.current);
       directionalModalTimeout.current = null;
     }
-    handleSmileInteraction(isListening, setIsListening, setListenTrigger);
+    handleSmileInteraction(isListening, setListenTrigger);
   };
   const handleSmile = () => {
     if (!isListening && !isTalking) {
