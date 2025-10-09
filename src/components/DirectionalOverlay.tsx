@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 
 type DirectionalOverlayProps = {
   /** Controls the visibility of the overlay. */
@@ -22,15 +23,26 @@ type ArrowProps = {
 
 function NeonArrow({ rotation, label }: ArrowProps) {
   return (
-    <svg
-      className="directional-overlay__icon"
-      viewBox="0 0 24 24"
-      role="img"
-      aria-label={label}
-      style={{ transform: `rotate(${rotation}deg)` }}
+    <div
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        display: "inline-block",
+      }}
     >
-      <path d="M13 3v10h4l-5 8-5-8h4V3h2z" />
-    </svg>
+      <svg
+        viewBox="0 0 24 24"
+        role="img"
+        aria-label={label}
+        style={{
+          width: "48px",
+          height: "48px",
+          fill: "#00ffff",
+          filter: "drop-shadow(0 0 8px #00ffff)",
+        }}
+      >
+        <path d="M13 3v10h4l-5 8-5-8h4V3h2z" />
+      </svg>
+    </div>
   );
 }
 
@@ -39,35 +51,89 @@ export default function DirectionalOverlay({
   onActivateVoice,
   disableVoiceButton,
 }: DirectionalOverlayProps) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   if (!visible) {
     return null;
   }
 
   return (
-    <div className="directional-overlay">
-      {/* Organizamos as setas em cruz, alinhadas ao corpo do robô. */}
-      <div className="directional-overlay__content">
-        <div className="directional-overlay__row">
-          {/* 180° vira a seta padrão (para baixo) para apontar para cima. */}
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        zIndex: 1000,
+        paddingTop: 100,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "20px",
+        }}
+      >
+        {/* Seta para cima (frente) */}
+        <div>
           <NeonArrow rotation={180} label="Mover para frente" />
         </div>
-        <div className="directional-overlay__row directional-overlay__row--middle">
+
+        {/* Linha do meio: Esquerda + Botão Central + Direita */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "20px",
+          }}
+        >
           <NeonArrow rotation={90} label="Mover para a esquerda" />
+
           <button
             type="button"
-            className="directional-overlay__center"
             onClick={onActivateVoice}
             disabled={disableVoiceButton}
             aria-label="Ativar modo de voz"
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              border: "3px solid #00ffff",
+              backgroundColor: "rgba(0, 255, 255, 0.1)",
+              color: "#00ffff",
+              fontSize: "32px",
+              cursor: disableVoiceButton ? "not-allowed" : "pointer",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              boxShadow: "0 0 20px #00ffff",
+              opacity: disableVoiceButton ? 0.5 : 1,
+            }}
           >
-            <span className="directional-overlay__center-icon" aria-hidden="true">
-              🎙️
-            </span>
-            <span className="directional-overlay__center-label">Falar</span>
+            <span aria-hidden="true">🎙️</span>
+            <span style={{ fontSize: "12px", fontWeight: "bold" }}>Falar</span>
           </button>
+
           <NeonArrow rotation={270} label="Mover para a direita" />
         </div>
-        <div className="directional-overlay__row">
+
+        {/* Seta para baixo (trás) */}
+        <div>
           <NeonArrow rotation={0} label="Mover para trás" />
         </div>
       </div>
