@@ -207,22 +207,25 @@ export default function VoiceAssistant({
             return;
           }
 
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audioRef.current = audio;
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          audioRef.current = audio;
 
           try {
-            const playPromise = audio.play();
-            if (playPromise !== undefined) await playPromise;
-            // Chama onAudioStart após iniciar a reprodução
-            if (onAudioStart) {
-              onAudioStart();
-            }
+            // Delega a orquestração da reprodução ao helper centralizado,
+            // garantindo que o reset ocorra apenas após o término natural.
+            await playAudioResponse({
+              audio,
+              url,
+              onAudioStart,
+              onResponsePendingEnd,
+              onPlaybackFinished: () => {
+                resetToIdle();
+              },
+            });
           } catch (playError) {
             console.error("Erro ao reproduzir áudio do Pollinations:", playError);
-            return;
-          } finally {
-            audio.onended = () => URL.revokeObjectURL(url);
+            resetToIdle();
           }
         } catch (audioError) {
           console.error("Erro no TTS:", audioError);
