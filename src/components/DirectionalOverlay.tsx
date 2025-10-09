@@ -66,7 +66,7 @@ export default function DirectionalOverlay({
   return (
     <div
       style={{
-        position: "fixed",
+        position: "absolute",
         top: 0,
         left: 0,
         right: 0,
