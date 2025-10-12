@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  buildGroqTtsBody,
+  resolveGroqConfig,
+} from "@/utils/groqConfig";
+
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_TTS_URL = "https://api.groq.com/openai/v1/audio/speech";
-const DEFAULT_CHAT_MODEL = "mixtral-8x7b-32768";
-const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
-const DEFAULT_TTS_VOICE = "alloy";
 
 /**
  * Conversa com a API da Groq para gerar o texto e sintetizar a resposta.
@@ -34,6 +36,10 @@ export async function POST(request: NextRequest) {
     "Você é um astrônomo que responde apenas em português do Brasil e fala somente sobre astronomia.";
 
   try {
+    // Resolvemos os parâmetros padrão/override uma única vez para
+    // garantir que as duas chamadas usem exatamente a mesma configuração.
+    const groqConfig = resolveGroqConfig();
+
     const chatResponse = await fetch(GROQ_CHAT_URL, {
       method: "POST",
       headers: {
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: process.env.GROQ_CHAT_MODEL ?? DEFAULT_CHAT_MODEL,
+        model: groqConfig.chatModel,
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: prompt },
@@ -74,11 +80,11 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: process.env.GROQ_TTS_MODEL ?? DEFAULT_TTS_MODEL,
-        voice: process.env.GROQ_TTS_VOICE ?? DEFAULT_TTS_VOICE,
-        input: answer,
-      }),
+      body: JSON.stringify(
+        // A função utilitária já adiciona voice/model e o formato WAV
+        // exigido pelo cliente, espelhando o exemplo oficial de integração.
+        buildGroqTtsBody(answer, groqConfig)
+      ),
     });
 
     if (!ttsResponse.ok) {
