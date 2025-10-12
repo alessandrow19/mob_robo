@@ -12,6 +12,7 @@ type VoiceAssistantProps = {
   onResponsePendingStart?: () => void;
   onResponsePendingEnd?: () => void;
   onPermissionDenied?: () => void;
+  onAnswerChange?: (answer: string | null) => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -46,6 +47,7 @@ export default function VoiceAssistant({
   onResponsePendingStart,
   onResponsePendingEnd,
   onPermissionDenied,
+  onAnswerChange,
 }: VoiceAssistantProps) {
   const [status, setStatus] = useState<"idle" | "listening" | "responding">(
     "idle"
@@ -139,6 +141,8 @@ export default function VoiceAssistant({
 
     updateStatus("listening");
     if (onStart) onStart();
+    // Limpa o balão enquanto aguardamos a próxima resposta da Groq.
+    if (onAnswerChange) onAnswerChange(null);
 
     timeoutRef.current = window.setTimeout(() => {
       resetToIdle();
@@ -186,6 +190,11 @@ export default function VoiceAssistant({
             contentType?: string;
           };
 
+        if (onAnswerChange) {
+          // Mantemos o último texto exibido mesmo após o áudio terminar.
+          onAnswerChange(answer ?? null);
+        }
+
         if (!audioBase64) {
           throw new Error("Resposta da Groq sem áudio.");
         }
@@ -213,6 +222,7 @@ export default function VoiceAssistant({
         }
       } catch (error) {
         console.error("Erro ao obter resposta da Groq:", error);
+        if (onAnswerChange) onAnswerChange(null);
         resetToIdle();
       }
     };
@@ -231,6 +241,7 @@ export default function VoiceAssistant({
     cleanupRecognition,
     handleStartFailure,
     onAudioStart,
+    onAnswerChange,
     onPermissionDenied,
     onResponsePendingEnd,
     onResponsePendingStart,

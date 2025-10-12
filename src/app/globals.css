@@ -114,6 +114,56 @@ body {
   z-index: 100;
 }
 
+/* Balão de fala inspirado em quadrinhos para exibir as respostas textuais. */
+.speech-bubble {
+  position: absolute;
+  top: -32px;
+  right: -24px;
+  max-width: 280px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 2px solid rgba(23, 23, 23, 0.85);
+  background: rgba(255, 255, 255, 0.95);
+  color: #0a0a0a;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  word-break: break-word;
+  z-index: 120;
+}
+
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  right: 32px;
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-bottom: 0;
+  margin-left: -6px;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.18));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.speech-bubble::before {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  right: 28px;
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-top-color: rgba(23, 23, 23, 0.85);
+  border-bottom: 0;
+  margin-left: -6px;
+  z-index: 0;
+  pointer-events: none;
+}
+
 @keyframes pulse {
   0%,
   100% {

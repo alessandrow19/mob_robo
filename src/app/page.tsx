@@ -27,7 +27,11 @@ export default function Home() {
   const [isTalking, setIsTalking] = useState(false);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
   const [showDirectionalModal, setShowDirectionalModal] = useState(false);
+  const [assistantAnswer, setAssistantAnswer] = useState<string | null>(null);
   const directionalModalTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Normalizamos o texto recebido da Groq antes de exibi-lo no balão.
+  const sanitizedAnswer = assistantAnswer?.trim();
+  const hasAssistantAnswer = Boolean(sanitizedAnswer);
 
   // Limpa o temporizador ao desmontar a página para evitar vazamentos.
   useEffect(() => {
@@ -101,9 +105,16 @@ export default function Home() {
           setIsAwaitingResponse(false);
           setShowDirectionalModal(false);
         }}
+        onAnswerChange={setAssistantAnswer}
       />
 
       <div className="relative m-auto flex flex-col items-center">
+        {hasAssistantAnswer && (
+          <div className="speech-bubble">
+            {/* Mantemos o texto acessível e facilmente ajustável. */}
+            <p>{sanitizedAnswer}</p>
+          </div>
+        )}
         <RobotEyes
           facePosition={facePosition}
           isListening={isListening}
