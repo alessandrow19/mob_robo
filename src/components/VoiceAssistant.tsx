@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { getVoiceUrl } from "../utils/pollinations.js";
 import { playAudioResponse } from "../utils/audioPlayback";
 
 type VoiceAssistantProps = {
@@ -167,71 +166,53 @@ export default function VoiceAssistant({
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
-        const textResponse = await fetch(
-          `/api/pollinate?q=${encodeURIComponent(astronomyPrompt)}`,
-          {
-            cache: "no-store",
-            headers: {
-              "Accept-Language": "pt-BR",
-              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
-            },
-          }
-        );
-        if (!textResponse.ok) throw new Error("Falha ao obter texto");
-        const answer = await textResponse.text();
+        const groqResponse = await fetch("/api/pollinate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt: astronomyPrompt }),
+        });
+
+        if (!groqResponse.ok) {
+          const message = await safeReadError(groqResponse);
+          throw new Error(message);
+        }
+
+        const { answer, audioBase64, contentType } =
+          (await groqResponse.json()) as {
+            answer?: string;
+            audioBase64?: string;
+            contentType?: string;
+          };
+
+        if (!audioBase64) {
+          throw new Error("Resposta da Groq sem áudio.");
+        }
+
+        const audioBlob = base64ToBlob(audioBase64, contentType);
+        const url = URL.createObjectURL(audioBlob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
 
         try {
-          // ❌ Sem Authorization aqui — evita CORS preflight
-          const audioResponse = await fetch(getVoiceUrl(answer), {
-            // ajuda alguns browsers a escolherem o decodificador
-            headers: {
-              Accept: "audio/mpeg,audio/*;q=0.9,*/*;q=0.8",
-              Authorization: "Bearer fr5BZb9Dr07vjlQ0",
+          // Delega a orquestração da reprodução ao helper centralizado,
+          // garantindo que o reset ocorra apenas após o término natural.
+          await playAudioResponse({
+            audio,
+            url,
+            onAudioStart,
+            onResponsePendingEnd,
+            onPlaybackFinished: () => {
+              resetToIdle();
             },
-            cache: "no-store",
-            mode: "cors",
           });
-
-          if (!audioResponse.ok) {
-            console.error(
-              "Falha ao obter áudio do Pollinations",
-              audioResponse.status,
-              audioResponse.statusText
-            );
-            return;
-          }
-
-          const blob = await audioResponse.blob();
-          if (!blob || blob.size === 0) {
-            console.error("Blob de áudio vazio");
-            return;
-          }
-
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audioRef.current = audio;
-
-          try {
-            // Delega a orquestração da reprodução ao helper centralizado,
-            // garantindo que o reset ocorra apenas após o término natural.
-            await playAudioResponse({
-              audio,
-              url,
-              onAudioStart,
-              onResponsePendingEnd,
-              onPlaybackFinished: () => {
-                resetToIdle();
-              },
-            });
-          } catch (playError) {
-            console.error("Erro ao reproduzir áudio do Pollinations:", playError);
-            resetToIdle();
-          }
-        } catch (audioError) {
-          console.error("Erro no TTS:", audioError);
+        } catch (playError) {
+          console.error("Erro ao reproduzir áudio sintetizado:", playError);
+          resetToIdle();
         }
       } catch (error) {
-        console.error("Erro ao obter resposta:", error);
+        console.error("Erro ao obter resposta da Groq:", error);
         resetToIdle();
       }
     };
@@ -278,4 +259,30 @@ export default function VoiceAssistant({
   }, [stopTrigger, resetToIdle]);
 
   return null;
+}
+
+function base64ToBlob(base64: string, mimeType = "audio/mpeg"): Blob {
+  // Decodifica a string para bytes; usamos atob por ser suportado no browser.
+  const binary = atob(base64);
+  const length = binary.length;
+  const bytes = new Uint8Array(length);
+
+  for (let i = 0; i < length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes.buffer], { type: mimeType });
+}
+
+async function safeReadError(response: Response): Promise<string> {
+  try {
+    const data = await response.json();
+    return typeof data?.error === "string" ? data.error : JSON.stringify(data);
+  } catch {
+    try {
+      return await response.text();
+    } catch {
+      return `status ${response.status}`;
+    }
+  }
 }
