@@ -192,7 +192,8 @@ const VoiceAssistant = forwardRef<VoiceAssistantHandle, VoiceAssistantProps>(
       const astronomyPrompt = `Por favor, responda exclusivamente em português do Brasil e apenas a perguntas relacionadas à astronomia. Pergunta: ${transcript}`;
 
       try {
-        const groqResponse = await fetch("/api/pollinate", {
+        // Encaminha o prompt para o endpoint dedicado da Groq.
+        const groqResponse = await fetch("/api/groq", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

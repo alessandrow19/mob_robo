@@ -1,4 +1,5 @@
-const DEFAULT_CHAT_MODEL = "mixtral-8x7b-32768";
+// mixtral-8x7b-32768 foi descontinuado pela Groq; usamos um modelo suportado por padrão.
+const DEFAULT_CHAT_MODEL = "llama3-8b-8192";
 const DEFAULT_TTS_MODEL = "playai-tts";
 const DEFAULT_TTS_VOICE = "Aaliyah-PlayAI";
 const DEFAULT_TTS_FORMAT = "wav";
