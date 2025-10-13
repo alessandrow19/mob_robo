@@ -8,6 +8,7 @@ import DirectionTracker from "@/components/DirectionTracker"; // Importe o compo
 import VoiceAssistant, {
   VoiceAssistantHandle,
 } from "@/components/VoiceAssistant";
+import ListeningIndicator from "@/components/ListeningIndicator";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
@@ -82,6 +83,9 @@ export default function Home() {
   };
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
+      {/* Indicador visual para orientar o usuário sobre a captura de áudio ativa. */}
+      <ListeningIndicator isListening={isListening} />
+
       <VoiceAssistant
         ref={voiceAssistantRef}
         trigger={listenTrigger}
