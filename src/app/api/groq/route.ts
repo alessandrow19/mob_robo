@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { buildGroqTtsBody, resolveGroqConfig } from "@/utils/groqConfig";
+import { fetchWithGroqTls, resolveGroqTlsConfig } from "@/utils/groqHttp";
 
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_TTS_URL = "https://api.groq.com/openai/v1/audio/speech";
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest) {
     const groqConfig = resolveGroqConfig();
     console.log("[Groq] Config resolvida:", groqConfig);
 
+    // Em alguns ambientes corporativos a verificação TLS padrão pode falhar.
+    // Quando há variáveis de ambiente para ajustar o comportamento, resolvemos
+    // uma configuração específica para TLS e a reaproveitamos nas chamadas.
+    const tlsConfig = resolveGroqTlsConfig();
+
     // ===== VALIDAÇÃO PRÉVIA =====
     console.log("[Groq] API Key presente?", !!apiKey);
     console.log(
@@ -54,14 +60,18 @@ export async function POST(request: NextRequest) {
 
     let chatResponse;
     try {
-      chatResponse = await fetch(GROQ_CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+      chatResponse = await fetchWithGroqTls(
+        GROQ_CHAT_URL,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(chatPayload),
         },
-        body: JSON.stringify(chatPayload),
-      });
+        tlsConfig
+      );
     } catch (fetchError) {
       console.error("[Groq] ERRO NO FETCH DE CHAT:", fetchError);
       console.error(
@@ -122,14 +132,18 @@ export async function POST(request: NextRequest) {
 
     let ttsResponse;
     try {
-      ttsResponse = await fetch(GROQ_TTS_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+      ttsResponse = await fetchWithGroqTls(
+        GROQ_TTS_URL,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(ttsPayload),
         },
-        body: JSON.stringify(ttsPayload),
-      });
+        tlsConfig
+      );
     } catch (fetchError) {
       console.error("[Groq] ERRO NO FETCH DE TTS:", fetchError);
       console.error(

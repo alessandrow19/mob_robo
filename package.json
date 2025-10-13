@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node_modules/next/dist/bin/next start",
-    "pretest": "tsc src/components/robotEyesUtils.ts src/components/RobotEyes.tsx src/components/VoiceAssistant.tsx src/utils/interactionHandlers.ts src/utils/audioPlayback.ts src/utils/groqConfig.ts --outDir build --module commonjs --jsx react-jsx --lib es2015,dom --esModuleInterop --skipLibCheck",
+    "pretest": "tsc src/components/robotEyesUtils.ts src/components/RobotEyes.tsx src/components/VoiceAssistant.tsx src/utils/interactionHandlers.ts src/utils/audioPlayback.ts src/utils/groqConfig.ts src/utils/groqHttp.ts --outDir build --module commonjs --jsx react-jsx --lib es2015,dom --esModuleInterop --skipLibCheck",
     "test": "node --test tests"
   },
   "dependencies": {
