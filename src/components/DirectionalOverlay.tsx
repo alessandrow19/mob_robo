@@ -34,8 +34,8 @@ function NeonArrow({ rotation, label }: ArrowProps) {
         role="img"
         aria-label={label}
         style={{
-          width: "48px",
-          height: "48px",
+          width: "100px",
+          height: "100px",
           fill: "#00ffff",
           filter: "drop-shadow(0 0 8px #00ffff)",
         }}
@@ -74,9 +74,9 @@ export default function DirectionalOverlay({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backgroundColor: "rgba(0, 0, 0, 0)",
         zIndex: 1000,
-        paddingTop: 100,
+        paddingTop: 200,
       }}
     >
       <div
