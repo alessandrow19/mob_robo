@@ -5,7 +5,9 @@ import VideoStream from "@/components/VideoStream";
 import RobotEyes from "@/components/RobotEyes";
 import { useEffect, useRef, useState } from "react";
 import DirectionTracker from "@/components/DirectionTracker"; // Importe o componente
-import VoiceAssistant from "@/components/VoiceAssistant";
+import VoiceAssistant, {
+  VoiceAssistantHandle,
+} from "@/components/VoiceAssistant";
 import {
   handleSmileInteraction,
   handleAngryInteraction,
@@ -29,6 +31,7 @@ export default function Home() {
   const [showDirectionalModal, setShowDirectionalModal] = useState(false);
   const [assistantAnswer, setAssistantAnswer] = useState<string | null>(null);
   const directionalModalTimeout = useRef<NodeJS.Timeout | null>(null);
+  const voiceAssistantRef = useRef<VoiceAssistantHandle | null>(null);
   // Normalizamos o texto recebido da Groq antes de exibi-lo no balão.
   const sanitizedAnswer = assistantAnswer?.trim();
   const hasAssistantAnswer = Boolean(sanitizedAnswer);
@@ -65,7 +68,12 @@ export default function Home() {
       clearTimeout(directionalModalTimeout.current);
       directionalModalTimeout.current = null;
     }
-    handleSmileInteraction(isListening, setListenTrigger);
+    if (voiceAssistantRef.current) {
+      // O clique direto no botão garante o gesto de usuário exigido pelo navegador.
+      voiceAssistantRef.current.start();
+    } else {
+      handleSmileInteraction(isListening, setListenTrigger);
+    }
   };
   const handleSmile = () => {
     if (!isListening && !isTalking) {
@@ -75,6 +83,7 @@ export default function Home() {
   return (
     <div className="relative grid min-h-dvh w-dvw place-items-center">
       <VoiceAssistant
+        ref={voiceAssistantRef}
         trigger={listenTrigger}
         stopTrigger={stopTrigger}
         onStart={() => {

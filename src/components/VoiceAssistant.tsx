@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { playAudioResponse } from "../utils/audioPlayback";
 
 type VoiceAssistantProps = {
@@ -13,6 +20,17 @@ type VoiceAssistantProps = {
   onResponsePendingEnd?: () => void;
   onPermissionDenied?: () => void;
   onAnswerChange?: (answer: string | null) => void;
+};
+
+export type VoiceAssistantHandle = {
+  /**
+   * Inicia manualmente a captura de áudio, respeitando as mesmas validações do gatilho automático.
+   */
+  start: () => void;
+  /**
+   * Encerra imediatamente qualquer fluxo em andamento, retornando o componente ao estado "idle".
+   */
+  stop: () => void;
 };
 
 interface CustomSpeechRecognitionEvent extends Event {
@@ -38,17 +56,21 @@ interface SpeechRecognitionErrorEvent extends Event {
   error?: string;
 }
 
-export default function VoiceAssistant({
-  trigger,
-  stopTrigger = 0,
-  onStart,
-  onEnd,
-  onAudioStart,
-  onResponsePendingStart,
-  onResponsePendingEnd,
-  onPermissionDenied,
-  onAnswerChange,
-}: VoiceAssistantProps) {
+const VoiceAssistant = forwardRef<VoiceAssistantHandle, VoiceAssistantProps>(
+  function VoiceAssistant(
+    {
+      trigger,
+      stopTrigger = 0,
+      onStart,
+      onEnd,
+      onAudioStart,
+      onResponsePendingStart,
+      onResponsePendingEnd,
+      onPermissionDenied,
+      onAnswerChange,
+    }: VoiceAssistantProps,
+    ref
+  ) {
   const [status, setStatus] = useState<"idle" | "listening" | "responding">(
     "idle"
   );
@@ -269,8 +291,23 @@ export default function VoiceAssistant({
     }
   }, [stopTrigger, resetToIdle]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      start: () => {
+        startListening();
+      },
+      stop: () => {
+        resetToIdle();
+      },
+    }),
+    [resetToIdle, startListening]
+  );
+
   return null;
-}
+});
+
+export default VoiceAssistant;
 
 function base64ToBlob(base64: string, mimeType = "audio/mpeg"): Blob {
   // Decodifica a string para bytes; usamos atob por ser suportado no browser.
