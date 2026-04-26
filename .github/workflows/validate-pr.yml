@@ -1,0 +1,55 @@
+name: Validar descrição do PR
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  validar-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validar campos obrigatórios
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+
+            const requiredSections = [
+              "## Descrição",
+              "## O que foi feito?",
+              "## Como testar?"
+            ];
+
+            function getSectionContent(body, title) {
+              const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+              const regex = new RegExp(`${escaped}\\s*([\\s\\S]*?)(?=\\n##\\s|$)`, "i");
+              const match = body.match(regex);
+              return match ? match[1].trim() : "";
+            }
+
+            const errors = [];
+
+            for (const section of requiredSections) {
+              const content = getSectionContent(body, section);
+
+              const cleaned = content
+                .replace(/<!--[\s\S]*?-->/g, "")
+                .replace(/[-*]\s*$/gm, "")
+                .replace(/\d+\.\s*$/gm, "")
+                .trim();
+
+              if (!cleaned) {
+                errors.push(`A seção "${section}" precisa ser preenchida.`);
+              }
+            }
+
+            const hasCheckedType = /-\s*\[[xX]\]\s*(feat|fix|chore|refactor|docs|test)/.test(body);
+
+            if (!hasCheckedType) {
+              errors.push("Marque pelo menos um tipo de alteração.");
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(errors.join("\n"));
+            }
